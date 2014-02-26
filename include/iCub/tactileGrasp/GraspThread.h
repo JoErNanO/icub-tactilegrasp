@@ -31,7 +31,10 @@
 #include <yarp/os/Semaphore.h>
 #include <yarp/os/ResourceFinder.h>
 #include <yarp/dev/PolyDriver.h> 
-#include <yarp/dev/ControlBoardInterfaces.h> 
+#include <yarp/dev/IEncoders.h>
+#include <yarp/dev/IVelocityControl.h>
+#include <yarp/dev/IVelocityControl2.h>
+#include <yarp/dev/IPositionControl.h>
 
 
 namespace iCub {
@@ -74,7 +77,7 @@ namespace iCub {
             static const int REF_SPEED_ARM = 10;		// reference speed for the arm joints from 0 to 6
             static const int REF_SPEED_FINGER = 100;	// reference speed for the finger joints from 7 to 15
             static const int REF_ACC_ARM = 10;			// reference accelleration for the arm joints from 0 to 6
-            static const int REF_ACC_FINGER = 10000;		// reference accelleration for the finger joints from 7 to 15	
+            static const int REF_ACC_FINGER = 10e6;		// reference accelleration for the finger joints from 7 to 15	
             
             static const int MOTOR_MIN[];				// min values of the motor encoders
             static const int MOTOR_MAX[];				// max values of the motor encoders
@@ -120,6 +123,7 @@ namespace iCub {
             yarp::dev::PolyDriver* robotDevice;
             yarp::dev::IPositionControl *pos;
             yarp::dev::IVelocityControl *vel;
+//            yarp::dev::IVelocityControl2 *vel;
             yarp::dev::IEncoders *encs;
             int NUM_JOINTS;								// number of joints of the arm
             yarp::sig::Vector encoders;

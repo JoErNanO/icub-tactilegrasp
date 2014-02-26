@@ -72,6 +72,7 @@ bool GraspThread::threadInit() {
     Property params;
     params.put("robot", robotName.c_str());	
     params.put("device", "remote_controlboard");	
+    params.put("writeStrict", "on");	
     if(rightHand) {
 	    params.put("part", "right_arm");
 	    params.put("local", ("/"+moduleName+"/right_arm").c_str());   //local port names
@@ -218,8 +219,9 @@ void GraspThread::run() {
                 touchPerFinger[i/12] = (float)(compensatedData[i]-percentile[i]);
                 touchBandPerFinger[i/12].min = (float)(compensatedData[i]-percentile[i]);
             }
-            if( compensatedData[i]+percentile[i] > touchBandPerFinger[i/12].max )
+            if( compensatedData[i]+percentile[i] > touchBandPerFinger[i/12].max ) {
                 touchBandPerFinger[i/12].max = (float)(compensatedData[i]+percentile[i]);
+            }
 	}
 	percentileSem.post();		// now the percentile can be modified again
 
@@ -228,25 +230,27 @@ void GraspThread::run() {
 	controllerSem.wait();	// make sure the touch_desired is not modified
 	for(int i=0; i<NUM_FINGERS; i++) {
             touchErrorOld[i] = touchError[i];
-            if(touchBandPerFinger[i].max < touch_desired)
+            if(touchBandPerFinger[i].max < touch_desired) {
                 touchError[i] = touch_desired - touchBandPerFinger[i].max;	// touch desired is higher than the band
-            else if(touchBandPerFinger[i].min > touch_desired)
+            } else if(touchBandPerFinger[i].min > touch_desired) {
                 touchError[i] = touch_desired - touchBandPerFinger[i].min;	// touch desired is lower than the band
-            else
+            } else {
                 touchError[i] = 0;											// touch desired is within the band
+            }
 	}
 	controllerSem.post();	// now the touch_threshold can be modified again
 
 	
-        if(doControl)
+        if(doControl) {
             controller();
-	else
+        } else {
             grasp();
+        }
 		
     
         sendMonitoringData();
         
-        Time::delay(0.01);
+        Time::delay(0.02);
     }
 }
 
@@ -327,19 +331,29 @@ void GraspThread::grasp() {
     }
     cout << "\n";
 #endif
+ 
+    vector<int> jointsMove;
+    vector<int> jointsStop;
+    vector<double> velocities;
 
     //index and middle fingers
     cout << moduleName << ": Detected touch value: ";
-    for(unsigned int i=0; i<detect_touch_finger.size()-1; i++) {
+    for(unsigned int i=0; i<detect_touch_finger.size()-1; ++i) {
 	if (detect_touch_finger[i]) {
             cout << i << " - " << touchPerFinger[i] << "    ";
 //          safeVelocityMove(11+2*i, speedTouch);
 //          safeVelocityMove(12+2*i, speedTouch);
             vel->stop(11+2*i);
             vel->stop(12+2*i);
+//            jointsStop.push_back(11+2*i);
+//            jointsStop.push_back(12+2*i);
 	} else {
             safeVelocityMove(11+2*i, speedNoTouch);
             safeVelocityMove(12+2*i, speedNoTouch);
+//            jointsMove.push_back(11+2*i);
+//            jointsMove.push_back(12+2*i);
+//            velocities.push_back(speedNoTouch);
+//            velocities.push_back(speedNoTouch);
 	}
     }
 
@@ -348,10 +362,24 @@ void GraspThread::grasp() {
         cout << detect_touch_finger.size() - 1 << " - " << touchPerFinger[detect_touch_finger.size() - 1] << " ";
 //        safeVelocityMove(15, speedTouch*3);
         vel->stop(15);
+//        jointsStop.push_back(15);
     } else {
         safeVelocityMove(15, speedNoTouch*3);
+//        jointsMove.push_back(15);
+//        velocities.push_back(speedNoTouch*3);
     }
     cout << "\n";
+
+//    cout << "Moving joints speeds: ";
+//    for (int i = 0; i< jointsMove.size(); ++i) {
+//        cout << jointsMove[i] << " . " << velocities[i] << ";\t";
+//    }
+//    cout << "\n";
+//
+//
+//    // Send move commands
+//    vel->stop(jointsStop.size(), &(jointsStop[0]));
+//    vel->velocityMove(jointsMove.size(), &(jointsMove[0]), &(velocities[0]));
 }
 
 /**
@@ -422,7 +450,7 @@ void GraspThread::setArmJointsPos() {
 	pos->positionMove(14, 20);
 	pos->positionMove(15, 40);
     } else {
-    pos->positionMove(11, 0);
+        pos->positionMove(11, 0);
 	pos->positionMove(12, 0);
 	pos->positionMove(13, 0);
 	pos->positionMove(14, 0);
