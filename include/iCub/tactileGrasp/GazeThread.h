@@ -38,6 +38,8 @@ namespace iCub {
             yarp::dev::ICartesianControl *iCart;
             yarp::dev::IGazeControl *iGaze;
 
+            yarp::sig::Vector startGaze;
+
             /* ******* Debug attributes.                ******* */
             std::string dbgTag;
 

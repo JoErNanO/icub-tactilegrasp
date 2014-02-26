@@ -41,6 +41,10 @@ GazeThread::GazeThread(int aPeriod, ICartesianControl *aICart, IGazeControl *aIG
 
 bool GazeThread::threadInit() {
     cout << dbgTag << "Starting thread. \n";
+
+    // Store initial gaze
+    iGaze->getFixationPoint(startGaze);
+
     cout << dbgTag << "Done. \n";
     
     return true;
@@ -48,6 +52,9 @@ bool GazeThread::threadInit() {
 
 void GazeThread::threadRelease() {
     cout << dbgTag << "Stopping thread. \n";
+
+    // Restore initial gaze
+    iGaze->lookAtFixationPoint(startGaze);
 
     // Stop cartesian and gaze controller
     iCart->stopControl();
