@@ -117,12 +117,14 @@ namespace iCub {
                 virtual bool interruptModule();
                 virtual bool close();
                 virtual bool respond(const yarp::os::Bottle &command, yarp::os::Bottle &reply);
+                virtual bool attach(yarp::os::RpcServer &source);
 
                 // RPC Methods
-                bool open(void);
-                bool grasp(void);
-                bool crush(void);
-                bool quit(void);
+                virtual bool open(void);
+                virtual bool grasp(void);
+                virtual bool crush(void);
+                virtual bool quit(void);
+                virtual bool setThreshold(const int aFinger, const double aThreshold);
         };
     }
 }

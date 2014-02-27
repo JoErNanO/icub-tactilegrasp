@@ -39,6 +39,11 @@ public:
  * @return true/false on success/failure.
  */
   virtual bool quit();
+/**
+ * Set the touch threshold.
+ * @return true/false on success/failure.
+ */
+  virtual bool setThreshold(const int32_t aFinger, const double aThreshold);
   virtual bool read(yarp::os::ConnectionReader& connection);
   virtual std::vector<std::string> help(const std::string& functionName="--all");
 };

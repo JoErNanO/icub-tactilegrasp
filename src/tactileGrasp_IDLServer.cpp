@@ -86,6 +86,30 @@ public:
   }
 };
 
+class tactileGrasp_IDLServer_setThreshold : public yarp::os::Portable {
+public:
+  int32_t aFinger;
+  double aThreshold;
+  bool _return;
+  virtual bool write(yarp::os::ConnectionWriter& connection) {
+    yarp::os::idl::WireWriter writer(connection);
+    if (!writer.writeListHeader(3)) return false;
+    if (!writer.writeTag("setThreshold",1,1)) return false;
+    if (!writer.writeI32(aFinger)) return false;
+    if (!writer.writeDouble(aThreshold)) return false;
+    return true;
+  }
+  virtual bool read(yarp::os::ConnectionReader& connection) {
+    yarp::os::idl::WireReader reader(connection);
+    if (!reader.readListReturn()) return false;
+    if (!reader.readBool(_return)) {
+      reader.fail();
+      return false;
+    }
+    return true;
+  }
+};
+
 bool tactileGrasp_IDLServer::open() {
   bool _return = false;
   tactileGrasp_IDLServer_open helper;
@@ -118,6 +142,17 @@ bool tactileGrasp_IDLServer::quit() {
   tactileGrasp_IDLServer_quit helper;
   if (!yarp().canWrite()) {
     fprintf(stderr,"Missing server method '%s'?\n","bool tactileGrasp_IDLServer::quit()");
+  }
+  bool ok = yarp().write(helper,helper);
+  return ok?helper._return:_return;
+}
+bool tactileGrasp_IDLServer::setThreshold(const int32_t aFinger, const double aThreshold) {
+  bool _return = false;
+  tactileGrasp_IDLServer_setThreshold helper;
+  helper.aFinger = aFinger;
+  helper.aThreshold = aThreshold;
+  if (!yarp().canWrite()) {
+    fprintf(stderr,"Missing server method '%s'?\n","bool tactileGrasp_IDLServer::setThreshold(const int32_t aFinger, const double aThreshold)");
   }
   bool ok = yarp().write(helper,helper);
   return ok?helper._return:_return;
@@ -174,6 +209,27 @@ bool tactileGrasp_IDLServer::read(yarp::os::ConnectionReader& connection) {
       reader.accept();
       return true;
     }
+    if (tag == "setThreshold") {
+      int32_t aFinger;
+      double aThreshold;
+      if (!reader.readI32(aFinger)) {
+        reader.fail();
+        return false;
+      }
+      if (!reader.readDouble(aThreshold)) {
+        reader.fail();
+        return false;
+      }
+      bool _return;
+      _return = setThreshold(aFinger,aThreshold);
+      yarp::os::idl::WireWriter writer(reader);
+      if (!writer.isNull()) {
+        if (!writer.writeListHeader(1)) return false;
+        if (!writer.writeBool(_return)) return false;
+      }
+      reader.accept();
+      return true;
+    }
     if (tag == "help") {
       std::string functionName;
       if (!reader.readString(functionName)) {
@@ -212,6 +268,7 @@ std::vector<std::string> tactileGrasp_IDLServer::help(const std::string& functio
     helpString.push_back("grasp");
     helpString.push_back("crush");
     helpString.push_back("quit");
+    helpString.push_back("setThreshold");
     helpString.push_back("help");
   }
   else {
@@ -235,6 +292,11 @@ std::vector<std::string> tactileGrasp_IDLServer::help(const std::string& functio
     if (functionName=="quit") {
       helpString.push_back("bool quit() ");
       helpString.push_back("Quit the module. ");
+      helpString.push_back("@return true/false on success/failure. ");
+    }
+    if (functionName=="setThreshold") {
+      helpString.push_back("bool setThreshold(const int32_t aFinger, const double aThreshold) ");
+      helpString.push_back("Set the touch threshold. ");
       helpString.push_back("@return true/false on success/failure. ");
     }
     if (functionName=="help") {

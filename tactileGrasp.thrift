@@ -32,5 +32,11 @@ service tactileGrasp_IDLServer
      * Quit the module.
      * @return true/false on success/failure.
      */
-    bool quit();  
+    bool quit();
+
+    /**
+     * Set the touch threshold.
+     * @return true/false on success/failure.
+     */
+    bool setThreshold(1:i32 aFinger, 2:double aThreshold);
 }
