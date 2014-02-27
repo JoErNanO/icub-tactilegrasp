@@ -39,13 +39,13 @@ include_Directories(${skinDynLib_INCLUDE_DIRS})
 set(INC_SOURCES
     src/GazeThread.cpp
     src/GraspThread.cpp
-    src/TactileGrasp.cpp
-    src/TactileGraspMain.cpp
+    src/TactileGraspModule.cpp
+    src/main.cpp
 )
 set(INC_HEADERS
     include/iCub/tactileGrasp/GazeThread.h
     include/iCub/tactileGrasp/GraspThread.h
-    include/iCub/tactileGrasp/TactileGrasp.h
+    include/iCub/tactileGrasp/TactileGraspModule.h
 )
 source_group("Source Files" FILES ${INC_SOURCES})
 source_group("Header Files" FILES ${INC_HEADERS})

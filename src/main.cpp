@@ -1,8 +1,8 @@
 
 /* 
- * Copyright (C) 2009 RobotCub Consortium, European Commission FP6 Project IST-004370
- * Authors: Andrea Del Prete, Alexander Schmitz
- * email:   andrea.delprete@iit.it, alexander.schmitz@iit.it
+ * Copyright (C) 2014 Francesco Giovannini, iCub Facility - Istituto Italiano di Tecnologia
+ * Authors: Francesco Giovannini
+ * email:   francesco.giovannini@iit.it
  * website: www.robotcub.org 
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU General Public License, version 2 or any
@@ -17,7 +17,13 @@
  * Public License for more details
  */
 
-#include "iCub/tactileGrasp/TactileGrasp.h" 
+
+
+#include "iCub/tactileGrasp/TactileGraspModule.h" 
+
+using yarp::os::Network;
+using yarp::os::ResourceFinder;
+
 
 YARP_DECLARE_DEVICES(icubmod);
 
@@ -26,23 +32,25 @@ int main(int argc, char * argv[])
     // Initialise device driver list
     YARP_REGISTER_DEVICES(icubmod);
     
-	/* initialize yarp network */ 
-	Network yarp;
-	//Network::init();
-	//Time::turboBoost();
+    /* initialize yarp network */ 
+    Network yarp;
+    if (!yarp.checkNetwork()) {
+        std::cerr << "Error: yarp server is not available. \n";
+        return -1;
+    }     
 
-	/* create your module */
-	iCub::tactileGrasp::TactileGrasp module;
+    /* create your tactileGrasp */
+    iCub::tactileGrasp::TactileGraspModule tactileGrasp;
 
-	/* prepare and configure the resource finder */
-	ResourceFinder rf;
-	rf.setVerbose(true);
-	rf.setDefaultConfigFile("tactileGrasp.ini");			//overridden by --from parameter
-	rf.setDefaultContext("tactilegraspingDemo/conf");		//overridden by --context parameter
-	rf.configure("ICUB_ROOT", argc, argv);
+    /* prepare and configure the resource finder */
+    ResourceFinder rf;
+    rf.setVerbose(true);
+    rf.setDefaultConfigFile("tactileGrasp.ini");
+    rf.setDefaultContext("tactileGrasp");
+    rf.configure("ICUB_ROOT", argc, argv);
 
-	/* run the module: runModule() calls configure first and, if successful, it then runs */
-	module.runModule(rf);
+    /* run the tactileGrasp: runModule() calls configure first and, if successful, it then runs */
+    tactileGrasp.runModule(rf);
 
-	return 0;
+    return 0;
 }
