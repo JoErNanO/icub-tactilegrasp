@@ -21,6 +21,7 @@
 #include "iCub/tactileGrasp/GraspThread.h"
 
 #include <iostream>
+#include <algorithm>
 
 #include <yarp/os/Property.h>
 
@@ -59,6 +60,8 @@ bool GraspThread::threadInit(void) {
 
     /* ******* Ports                                ******* */
     portGraspThreadInSkinComp.open("/TactileGrasp/skin/" + whichHand + "_hand_comp:i");
+    portGraspThreadInSkinRaw.open("/TactileGrasp/skin/" + whichHand + "_hand_raw:i");
+    portGraspThreadInSkinContacts.open("/TactileGrasp/skin/contacts:i");
 
     /* ******* Joint interfaces                     ******* */
     string arm = whichHand + "_arm";
@@ -103,7 +106,10 @@ bool GraspThread::threadInit(void) {
 /* *********************************************************************************************************************** */
 /* ******* Run thread                                                       ********************************************** */
 void GraspThread::run(void) {
+    using std::vector;
 
+    vector<double> contacts;
+    detectContact(contacts);
 }  
 /* *********************************************************************************************************************** */
 
@@ -115,7 +121,11 @@ void GraspThread::threadRelease(void) {
     
     // Close ports
     portGraspThreadInSkinComp.interrupt();
+    portGraspThreadInSkinRaw.interrupt();
+    portGraspThreadInSkinContacts.interrupt();
     portGraspThreadInSkinComp.close();
+    portGraspThreadInSkinRaw.close();
+    portGraspThreadInSkinContacts.close();
 
     // Stop interfaces
     if (iVel) {
@@ -135,5 +145,50 @@ void GraspThread::threadRelease(void) {
     clientArm.close();
 
     cout << dbgTag << "Released. \n";
+}
+/* *********************************************************************************************************************** */
+
+/* *********************************************************************************************************************** */
+/* ******* Detect contact on each finger.                                   ********************************************** */
+bool GraspThread::detectContact(std::vector<double> &o_contacts) {
+    using yarp::sig::Vector;
+    using std::vector;
+
+    Vector *inComp = portGraspThreadInSkinComp.read(false);
+    if (inComp->size() > 0) {
+        // Convert yarp vector into stl vector
+        vector<double> contacts(12*5);
+        for (size_t i = 0; i < contacts.size(); ++i) {
+            contacts[i] = (*inComp)[i];
+        }
+
+        // Find maximum for each finger
+        o_contacts.resize(5, 0.0);
+        vector<double>::iterator start;
+        vector<double>::iterator end;
+        for (int i = 0; i < 5; ++i) {
+            start = contacts.begin() + 12*i;
+            end = start + 11;
+            
+            cout << dbgTag << *start << " " << *end << "\n";
+
+            o_contacts[i] = *std::max_element(start, end);
+        }
+    }
+
+    return true;
+}
+/* *********************************************************************************************************************** */
+
+
+/* *********************************************************************************************************************** */
+/* ******* Detect contact on each finger.                                   ********************************************** */
+bool GraspThread::detectContact(iCub::skinDynLib::skinContactList &o_contacts) {
+    using iCub::skinDynLib::skinContactList;
+
+    // Read contacts from port
+    skinContactList *scl = portGraspThreadInSkinContacts.read(false);    
+   
+    return false;
 }
 /* *********************************************************************************************************************** */

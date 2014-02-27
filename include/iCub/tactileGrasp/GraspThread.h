@@ -31,6 +31,8 @@
 #include <yarp/dev/IVelocityControl2.h>
 #include <yarp/sig/Vector.h>
 
+#include <iCub/skinDynLib/skinContactList.h>
+
 namespace iCub {
     namespace tactileGrasp {
         class GraspThread : public yarp::os::RateThread {
@@ -50,6 +52,8 @@ namespace iCub {
                 
                 /* ****** Ports                                         ****** */
                 yarp::os::BufferedPort<yarp::sig::Vector> portGraspThreadInSkinComp;
+                yarp::os::BufferedPort<yarp::sig::Vector> portGraspThreadInSkinRaw;
+                yarp::os::BufferedPort<iCub::skinDynLib::skinContactList> portGraspThreadInSkinContacts;
                 
 
                 /* ****** Debug attributes                              ****** */
@@ -62,6 +66,10 @@ namespace iCub {
                 virtual bool threadInit(void);
                 virtual void run(void);
                 virtual void threadRelease(void);
+
+            private:
+                bool detectContact(std::vector<double> &o_contacts);
+                bool detectContact(iCub::skinDynLib::skinContactList &o_contacts);
         };
     }
 }
