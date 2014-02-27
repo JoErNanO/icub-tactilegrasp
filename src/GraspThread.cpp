@@ -119,6 +119,10 @@ void GraspThread::threadRelease(void) {
 
     // Restore initial robot position
     iPos->positionMove(startPos.data());
+    bool done = false;
+    while (!done) {
+        iPos->checkMotionDone(&done);
+    }
 
     // Stop interfaces
     if (iPos) {
@@ -131,6 +135,5 @@ void GraspThread::threadRelease(void) {
     clientArm.close();
 
     cout << dbgTag << "Released. \n";
-    
 }
 /* *********************************************************************************************************************** */
