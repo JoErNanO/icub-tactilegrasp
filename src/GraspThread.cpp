@@ -117,20 +117,20 @@ void GraspThread::threadRelease(void) {
     portGraspThreadInSkinComp.interrupt();
     portGraspThreadInSkinComp.close();
 
-    // Restore initial robot position
-    iPos->positionMove(startPos.data());
-    bool done = false;
-    while (!done) {
-        iPos->checkMotionDone(&done);
-    }
-
     // Stop interfaces
-    if (iPos) {
-        iPos->stop();
-    }
-        if (iVel) {
+    if (iVel) {
         iVel->stop();
     }
+    if (iPos) {
+        iPos->stop();
+        // Restore initial robot position
+        iPos->positionMove(startPos.data());
+        bool done = false;
+        while (!done) {
+            iPos->checkMotionDone(&done);
+        }
+    }
+
     // Close driver
     clientArm.close();
 
