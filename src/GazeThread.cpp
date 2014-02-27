@@ -88,6 +88,9 @@ bool GazeThread::threadInit() {
     ss << "Gaze controller info = " << info.toString().c_str();
     cout << ss;
 
+    // Store initial gaze
+    iGaze->getFixationPoint(startGaze);
+
 
     cout << dbgTag << "Done. \n";
     

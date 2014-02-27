@@ -29,7 +29,6 @@
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/IPositionControl.h>
 #include <yarp/dev/IVelocityControl2.h>
-
 #include <yarp/sig/Vector.h>
 
 namespace iCub {
