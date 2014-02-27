@@ -72,24 +72,30 @@
 #ifndef __TACTILEGRASP_MODULE_H__
 #define __TACTILEGRASP_MODULE_H__
 
+#include "tactileGrasp_IDLServer.h"
 #include "iCub/tactileGrasp/GazeThread.h"
 #include "iCub/tactileGrasp/GraspThread.h"
 
 #include <string>
 
 #include <yarp/os/RFModule.h>
+#include <yarp/os/RpcServer.h>
 
 namespace iCub {
     namespace tactileGrasp {
-        class TactileGraspModule : public yarp::os::RFModule {
+        class TactileGraspModule : public yarp::os::RFModule, public tactileGrasp_IDLServer {
             private:
                 /* ****** Module attributes                             ****** */
                 double period;
 
                 std::string moduleName;
                 std::string robotName;
+
+                bool closing;
          
                 /* ****** Ports                                         ****** */
+                yarp::os::RpcServer portTactileGraspRPC;
+
 
                 /* ******* Threads                                      ******* */
                 iCub::tactileGrasp::GazeThread *gazeThread;
@@ -111,6 +117,12 @@ namespace iCub {
                 virtual bool interruptModule();
                 virtual bool close();
                 virtual bool respond(const yarp::os::Bottle &command, yarp::os::Bottle &reply);
+
+                // RPC Methods
+                bool open(void);
+                bool grasp(void);
+                bool crush(void);
+                bool quit(void);
         };
     }
 }

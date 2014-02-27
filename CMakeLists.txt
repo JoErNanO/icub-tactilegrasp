@@ -24,6 +24,9 @@ include(YarpInstallationHelpers)
 include(ICUBcontribOptions)
 include(ICUBcontribHelpers)
 #icubcontrib_set_default_prefix()
+# Thrift IDL
+include(YarpIDL)
+yarp_idl_to_dir(${PROJECTNAME}.thrift ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Add the example application "tactileGraspingDemo"
 set(ICUB_APPLICATIONS_PREFIX "$ENV{ICUB_ROOT}" CACHE PATH "Path where to install the applications")
@@ -36,20 +39,28 @@ include_directories(${ICUB_INCLUDE_DIRS})
 include_Directories(${skinDynLib_INCLUDE_DIRS})
 
 # Search for source code.
+set(INC_HEADERS
+    include/tactileGrasp_IDLServer.h
+    include/iCub/tactileGrasp/GazeThread.h
+    include/iCub/tactileGrasp/GraspThread.h
+    include/iCub/tactileGrasp/TactileGraspModule.h
+)
+
 set(INC_SOURCES
+    src/tactileGrasp_IDLServer.cpp
     src/GazeThread.cpp
     src/GraspThread.cpp
     src/TactileGraspModule.cpp
     src/main.cpp
 )
-set(INC_HEADERS
-    include/iCub/tactileGrasp/GazeThread.h
-    include/iCub/tactileGrasp/GraspThread.h
-    include/iCub/tactileGrasp/TactileGraspModule.h
-)
+
+set(IDL ${PROJECTNAME}.thrift)
+
 source_group("Source Files" FILES ${INC_SOURCES})
 source_group("Header Files" FILES ${INC_HEADERS})
-add_executable(${PROJECTNAME}  ${INC_SOURCES} ${INC_HEADERS})
+source_group("IDL Files"    FILES ${IDL})
+
+add_executable(${PROJECTNAME} ${INC_SOURCES} ${INC_HEADERS} ${IDL})
 
 target_link_libraries(${PROJECTNAME}  ${YARP_LIBRARIES} skinDynLib icubmod)
 
