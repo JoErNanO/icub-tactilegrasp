@@ -42,6 +42,8 @@ namespace iCub {
                 std::string robotName;
                 std::string whichHand;
 
+
+                /* ******* Controllers                                  ******* */
                 yarp::dev::PolyDriver clientArm;
                 yarp::dev::IEncoders *iEncs;
                 yarp::dev::IPositionControl *iPos;
@@ -49,6 +51,14 @@ namespace iCub {
 
                 /** Robot arm start position. */
                 yarp::sig::Vector startPos;
+
+
+                /* ******* Grasp configuration                          ******* */
+                static const int NUM_JOINTS = 5;
+                double VELOCITY_CRUSH;
+                std::vector<double> touchThresholds;
+                std::vector<int> graspJoints;
+
                 
                 /* ****** Ports                                         ****** */
                 yarp::os::BufferedPort<yarp::sig::Vector> portGraspThreadInSkinComp;
@@ -67,9 +77,16 @@ namespace iCub {
                 virtual void run(void);
                 virtual void threadRelease(void);
 
+                bool setTouchThreshold(const int aFinger, const double aThreshold);
+                bool openHand(void); 
+
             private:
-                bool detectContact(std::vector<double> &o_contacts);
+                bool detectContact(std::vector<bool> &o_contacts);
                 bool detectContact(iCub::skinDynLib::skinContactList &o_contacts);
+
+                bool moveFingers(const std::vector<bool> &i_contacts);
+
+                bool reachArm(void);
         };
     }
 }

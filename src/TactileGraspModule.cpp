@@ -57,7 +57,7 @@ double TactileGraspModule::getPeriod() { return period; }
 
 /* *********************************************************************************************************************** */
 /* ******* Configure module                                                 ********************************************** */   
-bool TactileGraspModule::configure(ResourceFinder &rf){
+bool TactileGraspModule::configure(ResourceFinder &rf) {
     using std::string;
 
     cout << dbgTag << "Starting. \n";
@@ -67,6 +67,11 @@ bool TactileGraspModule::configure(ResourceFinder &rf){
     moduleName = rf.check("name", Value("contactDetector"), "The module name.").asString().c_str();
     period = rf.check("period", 1.0).asDouble();
     robotName = rf.check("robot", Value("icub"), "The robot name.").asString().c_str();
+
+
+    /* ******* Open ports                                       ******* */
+    portTactileGraspRPC.open("/TactileGrasp/cmd:io");
+    attach(portTactileGraspRPC);
 
 
     /* ******* Get parameters from rf                           ******* */
@@ -81,7 +86,7 @@ bool TactileGraspModule::configure(ResourceFinder &rf){
         return false;
     }
     // Grasp hread
-    graspThread = new GraspThread(10, robotName, whichHand);
+    graspThread = new GraspThread(100, robotName, whichHand);
     if (!graspThread->start()) {
         cout << dbgTag << "Could not start the grasp thread. \n";
         return false;
@@ -94,6 +99,10 @@ bool TactileGraspModule::configure(ResourceFinder &rf){
 }
 /* *********************************************************************************************************************** */
 
+
+bool TactileGraspModule::attach(yarp::os::RpcServer &source) {
+    return this->yarp().attachAsServer(source);
+}
 
 /* *********************************************************************************************************************** */
 /* ******* Update    module                                                 ********************************************** */   
@@ -109,6 +118,7 @@ bool TactileGraspModule::interruptModule() {
     cout << dbgTag << "Interrupting. \n";
     
     // Interrupt ports
+    portTactileGraspRPC.interrupt();
 
     cout << dbgTag << "Interrupted correctly. \n";
 
@@ -122,7 +132,12 @@ bool TactileGraspModule::interruptModule() {
 bool TactileGraspModule::close() {
     cout << dbgTag << "Closing. \n";
     
+    // Stop threads
+    gazeThread->stop();
+    graspThread->stop();
+
     // Close ports
+    portTactileGraspRPC.close();
 
     cout << dbgTag << "Closed. \n";
     
@@ -144,7 +159,8 @@ bool TactileGraspModule::respond(const Bottle &command, Bottle &reply) {
 /* ******* RPC Open hand                                                    ********************************************** */
 bool TactileGraspModule::open(void) {
     graspThread->suspend();
-    return true;
+
+    return graspThread->openHand();
 }
 /* *********************************************************************************************************************** */
 
@@ -153,6 +169,7 @@ bool TactileGraspModule::open(void) {
 /* ******* RPC Grasp object                                                 ********************************************** */
 bool TactileGraspModule::grasp(void) {
     graspThread->resume();
+
     return true;
 }
 /* *********************************************************************************************************************** */
@@ -170,5 +187,13 @@ bool TactileGraspModule::crush(void) {
 /* ******* RPC Quit module                                                  ********************************************** */
 bool TactileGraspModule::quit(void) {
     return closing = true;
+}
+/* *********************************************************************************************************************** */
+
+
+/* *********************************************************************************************************************** */
+/* ******* Set touch threshold.                                             ********************************************** */
+bool TactileGraspModule::setThreshold(const int aFinger, const double aThreshold) {
+    return graspThread->setTouchThreshold(aFinger, aThreshold);
 }
 /* *********************************************************************************************************************** */
