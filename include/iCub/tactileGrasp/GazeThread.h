@@ -24,6 +24,7 @@
 #include <string>
 
 #include <yarp/os/RateThread.h>
+#include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/CartesianControl.h>
 #include <yarp/dev/GazeControl.h>
 
@@ -32,18 +33,26 @@ namespace iCub {
         class GazeThread : public yarp::os::RateThread {
         private:
             /* ******* Module attributes.               ******* */
-            bool rightHand;						// if true use the right hand, otherwise use the left hand
+            int period;
+            std::string robotName;
+            std::string whichHand;
 
-            /* ******* Cartesian and Gaze controller.   ******* */
+            /* ******* Cartesian controller.                ******* */
+            yarp::dev::PolyDriver clientCart;
             yarp::dev::ICartesianControl *iCart;
+            int startup_context_id_cart;
+            
+            /* ******* Gaze controller.                     ******* */
+            yarp::dev::PolyDriver clientGaze;
             yarp::dev::IGazeControl *iGaze;
+            int startup_context_id_gaze;
 
             /* ******* Debug attributes.                ******* */
             std::string dbgTag;
 
         public:
             /* class methods */
-            GazeThread(int aPeriod, yarp::dev::ICartesianControl *aICart, yarp::dev::IGazeControl *aIGaze);
+            GazeThread(const int aPeriod, const std::string &aRobotName, const std::string &aWhichHand);
             
             bool threadInit();     
             void threadRelease();
