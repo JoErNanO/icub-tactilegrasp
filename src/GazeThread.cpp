@@ -97,6 +97,9 @@ bool GazeThread::threadInit() {
 void GazeThread::threadRelease() {
     cout << dbgTag << "Stopping thread. \n";
 
+	// Restore initial gaze
+    iGaze->lookAtFixationPoint(startGaze);
+
     // Stop cartesian and gaze controller
     if (iCart) {
         iCart->stopControl();

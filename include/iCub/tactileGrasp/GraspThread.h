@@ -1,3 +1,4 @@
+
 /* 
  * Copyright (C) 2014 Francesco Giovannini, iCub Facility - Istituto Italiano di Tecnologia
  * Authors: Francesco Giovannini
@@ -17,9 +18,8 @@
  */
 
 
-
-#ifndef __TACTILEGRASP_GRASPTHREAD_H__
-#define __TACTILEGRASP_GRASPTHREAD_H__
+#ifndef __ICUB_TACTILEGRASP_GRASPTHREAD_H__
+#define __ICUB_TACTILEGRASP_GRASPTHREAD_H__
 
 #include <string>
 

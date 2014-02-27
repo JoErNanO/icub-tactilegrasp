@@ -47,6 +47,8 @@ namespace iCub {
             yarp::dev::IGazeControl *iGaze;
             int startup_context_id_gaze;
 
+            yarp::sig::Vector startGaze;
+
             /* ******* Debug attributes.                ******* */
             std::string dbgTag;
 
