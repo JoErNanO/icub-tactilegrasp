@@ -85,9 +85,7 @@ bool GraspThread::threadInit(void) {
                 for (int i = 0; i < nJoints; ++i) {
                     graspJoints.push_back(confJoints->get(i).asInt());
                     touchThresholds.push_back(confTouchThr->get(i).asDouble());
-                    cout << confJoints->get(i).asInt() << " " << confTouchThr->get(i).asDouble() << "\t";
                 }
-                cout << "\n";
             } else {
                 cerr << dbgTag << "One or more parameter lists contain either too few or too many parameters. \n";
                 cerr << dbgTag << "Expecting lists of size equal to the number of parameters. \n";
@@ -105,6 +103,7 @@ bool GraspThread::threadInit(void) {
 
 
 #ifdef TACTILEGRASP_DEBUG
+    cout << dbgTag << "Configured joints and thresholds: \t\t";
     for (int i = 0; i < nJoints; ++i) {
         cout << graspJoints[i] << " " << touchThresholds[i] << "\t";
     }
@@ -143,6 +142,9 @@ bool GraspThread::threadInit(void) {
     if (!iVel) {
         return false;
     }
+    // Set velocity control parameters
+    double refAccels = 10^6;
+    iVel->setRefAccelerations(&refAccels);
 
     /* ******* Store position prior to acquiring control.           ******* */
     int nnJoints;
@@ -172,7 +174,9 @@ void GraspThread::run(void) {
 
     vector<bool> contacts;
     if (detectContact(contacts)) {
-        moveFingers(contacts);
+        if (!moveFingers(contacts)) {
+            cout << dbgTag << "Could not perform the require grasp motion. \n";
+        }
     }
 }  
 /* *********************************************************************************************************************** */
@@ -233,6 +237,7 @@ bool GraspThread::detectContact(std::vector<bool> &o_contacts) {
         }
 
 #if TACTILEGRASP_DEBUG
+        cout << dbgTag << "Maximum contact detected: \t\t";
         for (size_t i = 0; i < maxContacts.size(); ++i) {
             cout << maxContacts[i] << " ";
         }
@@ -274,14 +279,29 @@ bool GraspThread::detectContact(iCub::skinDynLib::skinContactList &o_contacts) {
 bool GraspThread::moveFingers(const std::vector<bool> &i_contacts) {
     using std::vector;
 
-    vector<double> graspVelocities(i_contacts.size(), velocities.grasp);
+//    vector<double> graspVelocities(i_contacts.size(), velocities.grasp);
+    vector<double> graspVelocities(velocities.grasp);
     for (size_t i = 0; i < i_contacts.size(); ++i) {
         if (i_contacts[i]) {
-            graspVelocities[i] = velocities.stop;
+            graspVelocities[i] = velocities.stop[i];
         }
     }
 
-    return iVel->velocityMove(graspJoints.size(), &graspJoints[0], &graspVelocities[0]);
+#ifdef TACTILEGRASP_DEBUG
+    cout << dbgTag << "Moving joints at speeds: \t\t";
+    for (int i = 0; i < i_contacts.size(); ++i) {
+        cout << graspJoints[i] << " " << graspVelocities[i] << "\t";
+    }
+    cout << "\n";
+#endif
+
+    double vels[5];
+    int join[5];
+    std::copy(graspVelocities.begin(), graspVelocities.end(), vels);
+    std::copy(graspJoints.begin(), graspJoints.end(), vels);
+
+//    return iVel->velocityMove(graspJoints.size(), &graspJoints[0], &graspVelocities[0]);
+    return iVel->velocityMove(graspJoints.size(), join, vels);
 }
 /* *********************************************************************************************************************** */
 
@@ -338,7 +358,7 @@ bool GraspThread::reachArm(void) {
 
 /* *********************************************************************************************************************** */
 /* ******* Set the given velocity                                           ********************************************** */
-bool GraspThread::setVelocity(const int &i_type, const double &i_vel) {
+bool GraspThread::setVelocity(const int &i_type, const std::vector<double> &i_vel) {
     switch (i_type) {
         case GraspType::Stop :
             velocities.stop = i_vel;
@@ -355,3 +375,5 @@ bool GraspThread::setVelocity(const int &i_type, const double &i_vel) {
     return true;
 }
 /* *********************************************************************************************************************** */
+
+bool setVelocity(const int &i_type, const int &i_joint, const double &i_vel);

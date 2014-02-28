@@ -32,6 +32,8 @@ using yarp::os::Value;
 using yarp::os::Bottle;
 
 
+#define TACTILEGRASP_DEBUG 1 
+
 /* *********************************************************************************************************************** */
 /* ******* Constructor                                                      ********************************************** */   
 TactileGraspModule::TactileGraspModule() 
@@ -75,15 +77,44 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
 
 
     /* ******* Get parameters from rf                           ******* */
+    // Get number of joints
+    int nJoints = 0;
+    if (rf.check("nJoints")) {
+        nJoints = rf.find("nJoints").asInt();
+    } else {
+        cerr << dbgTag << "Could not find the number of controlled joints parameter (nJoints) in the specified configuration file. \n";
+        return false;
+    }
+
     // Build velocities
     Bottle &confVelocity = rf.findGroup("velocity");
     if (!confVelocity.isNull()) {
-        velocities.grasp = confVelocity.check("grasp", Value(50.0)).asDouble();
-        velocities.stop = confVelocity.check("stop", Value(50.0)).asDouble();
+        // Grasp velocities
+        Bottle *confVelGrasp = confVelocity.find("grasp").asList();
+        if (nJoints == confVelGrasp->size()) {
+            for (int i = 0; i < confVelGrasp->size(); ++i) {
+                velocities.grasp.push_back(confVelGrasp->get(i).asDouble());
+            }
+        } else {
+            cerr << dbgTag << "Too many or too few grasp velocities were found in the specified configuration file. \n";
+            cerr << dbgTag << "Expecting a number of velocities parameters equal to nJoints. \n";
+            return false;
+        }
+        
+        // Stop velocities
+        velocities.stop.resize(nJoints , confVelocity.check("stop", Value(0.0)).asDouble());
     } else {
-        velocities.grasp = 50;
-        velocities.stop = 0;
+        cerr << dbgTag << "Could not find the velocities parameter group [velocity] in the given configuration file. \n";
+        return false;
     }
+
+#ifdef TACTILEGRASP_DEBUG
+    cout << dbgTag << "Configured velocities: \t\t";
+    for (int i = 0; i < nJoints; ++i) {
+        cout << velocities.grasp[i] << " " << velocities.stop[i] << "\t";
+    }
+    cout << "\n";
+#endif
 
     /* ******* Threads                                          ******* */
     // Gaze thread
@@ -93,7 +124,7 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
         return false;
     }
     // Grasp hread
-    graspThread = new GraspThread(100, rf);
+    graspThread = new GraspThread(500, rf);
     if (!graspThread->start()) {
         cout << dbgTag << "Could not start the grasp thread. \n";
         return false;

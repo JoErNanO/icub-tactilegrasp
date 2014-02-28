@@ -24,6 +24,7 @@
 #include <iCub/tactileGrasp/TactileGraspEnums.h>
 
 #include <string>
+#include <vector>
 
 #include <yarp/os/RateThread.h>
 #include <yarp/os/ResourceFinder.h>
@@ -42,8 +43,8 @@ namespace iCub {
          * Structure containing the velocities to be used for each grasping movement.
          */
         struct GraspVelocity {
-            double grasp;
-            double stop;
+            std::vector<double> grasp;
+            std::vector<double> stop;
         };
 
         class GraspThread : public yarp::os::RateThread {
@@ -88,7 +89,8 @@ namespace iCub {
                 virtual void threadRelease(void);
 
                 bool setTouchThreshold(const int aFinger, const double aThreshold);
-                bool setVelocity(const int &i_type, const double &i_vel);
+                bool setVelocity(const int &i_type, const std::vector<double> &i_vel);
+                bool setVelocity(const int &i_type, const int &i_joint, const double &i_vel);
                 bool openHand(void); 
 
             private:
