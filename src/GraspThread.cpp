@@ -111,6 +111,7 @@ bool GraspThread::threadInit(void) {
     }
     cout << "\n";
 
+    // Put arm in position
     reachArm();
 
     
@@ -228,7 +229,7 @@ bool GraspThread::detectContact(iCub::skinDynLib::skinContactList &o_contacts) {
 bool GraspThread::moveFingers(const std::vector<bool> &i_contacts) {
     using std::vector;
 
-    vector<double> graspVelocities(NUM_JOINTS, VELOCITY_CRUSH);
+    vector<double> graspVelocities(i_contacts.size(), VELOCITY_CRUSH);
     for (size_t i = 0; i < i_contacts.size(); ++i) {
         if (i_contacts[i]) {
             graspVelocities[i] = 0;
