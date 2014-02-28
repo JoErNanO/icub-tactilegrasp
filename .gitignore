@@ -12,6 +12,10 @@
 *.la
 *.a
 
+# Temp files
+*~
+*.swp
+
 # Build directory
 build
 
