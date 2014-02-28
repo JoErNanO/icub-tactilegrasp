@@ -21,9 +21,12 @@
 #ifndef __ICUB_TACTILEGRASP_GRASPTHREAD_H__
 #define __ICUB_TACTILEGRASP_GRASPTHREAD_H__
 
+#include <iCub/tactileGrasp/TactileGraspEnums.h>
+
 #include <string>
 
 #include <yarp/os/RateThread.h>
+#include <yarp/os/ResourceFinder.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/IEncoders.h>
@@ -35,12 +38,19 @@
 
 namespace iCub {
     namespace tactileGrasp {
+        /**
+         * Structure containing the velocities to be used for each grasping movement.
+         */
+        struct GraspVelocity {
+            double grasp;
+            double stop;
+        };
+
         class GraspThread : public yarp::os::RateThread {
             private:
                 /* ****** Module attributes                             ****** */
                 int period;
-                std::string robotName;
-                std::string whichHand;
+                yarp::os::ResourceFinder rf;
 
 
                 /* ******* Controllers                                  ******* */
@@ -54,8 +64,8 @@ namespace iCub {
 
 
                 /* ******* Grasp configuration                          ******* */
-                static const int NUM_JOINTS = 5;
-                double VELOCITY_CRUSH;
+                GraspVelocity velocities;
+                int nJoints;
                 std::vector<double> touchThresholds;
                 std::vector<int> graspJoints;
 
@@ -70,7 +80,7 @@ namespace iCub {
                 std::string dbgTag;
 
             public:
-                GraspThread(const int aPeriod, const std::string &aRobotName, const std::string &aWhichHand);
+                GraspThread(const int aPeriod, const yarp::os::ResourceFinder &aRf);
                 virtual ~GraspThread();
 
                 virtual bool threadInit(void);
@@ -78,6 +88,7 @@ namespace iCub {
                 virtual void threadRelease(void);
 
                 bool setTouchThreshold(const int aFinger, const double aThreshold);
+                bool setVelocity(const int &i_type, const double &i_vel);
                 bool openHand(void); 
 
             private:

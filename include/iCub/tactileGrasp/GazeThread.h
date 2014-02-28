@@ -24,6 +24,7 @@
 #include <string>
 
 #include <yarp/os/RateThread.h>
+#include <yarp/os/ResourceFinder.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/CartesianControl.h>
 #include <yarp/dev/GazeControl.h>
@@ -31,37 +32,35 @@
 namespace iCub {
     namespace tactileGrasp {
         class GazeThread : public yarp::os::RateThread {
-        private:
-            /* ******* Module attributes.               ******* */
-            int period;
-            std::string robotName;
-            std::string whichHand;
+            private:
+                /* ******* Module attributes.               ******* */
+                int period;
+                yarp::os::ResourceFinder rf;
 
-            /* ******* Cartesian controller.                ******* */
-            yarp::dev::PolyDriver clientCart;
-            yarp::dev::ICartesianControl *iCart;
-            int startup_context_id_cart;
-            
-            /* ******* Gaze controller.                     ******* */
-            yarp::dev::PolyDriver clientGaze;
-            yarp::dev::IGazeControl *iGaze;
-            int startup_context_id_gaze;
+                /* ******* Cartesian controller.                ******* */
+                yarp::dev::PolyDriver clientCart;
+                yarp::dev::ICartesianControl *iCart;
+                int startup_context_id_cart;
+                
+                /* ******* Gaze controller.                     ******* */
+                yarp::dev::PolyDriver clientGaze;
+                yarp::dev::IGazeControl *iGaze;
+                int startup_context_id_gaze;
 
-            yarp::sig::Vector startGaze;
+                yarp::sig::Vector startGaze;
 
-            /* ******* Debug attributes.                ******* */
-            std::string dbgTag;
+                /* ******* Debug attributes.                ******* */
+                std::string dbgTag;
 
-        public:
-            /* class methods */
-            GazeThread(const int aPeriod, const std::string &aRobotName, const std::string &aWhichHand);
-            
-            bool threadInit();     
-            void threadRelease();
-            void run();
+            public:
+                GazeThread(const int aPeriod, const yarp::os::ResourceFinder &aRf);
+                
+                bool threadInit();     
+                void threadRelease();
+                void run();
 
-        private:
-            bool lookAtObject();
+            private:
+                bool lookAtObject();
         };
     } //namespace tactileGrasp
 } //namespace iCub

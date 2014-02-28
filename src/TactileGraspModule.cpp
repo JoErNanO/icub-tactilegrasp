@@ -59,6 +59,7 @@ double TactileGraspModule::getPeriod() { return period; }
 /* ******* Configure module                                                 ********************************************** */   
 bool TactileGraspModule::configure(ResourceFinder &rf) {
     using std::string;
+    using yarp::os::Property;
 
     cout << dbgTag << "Starting. \n";
 
@@ -66,7 +67,6 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
     // Get resource finder and extract properties
     moduleName = rf.check("name", Value("contactDetector"), "The module name.").asString().c_str();
     period = rf.check("period", 1.0).asDouble();
-    robotName = rf.check("robot", Value("icub"), "The robot name.").asString().c_str();
 
 
     /* ******* Open ports                                       ******* */
@@ -75,18 +75,25 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
 
 
     /* ******* Get parameters from rf                           ******* */
-    string whichHand = rf.check("whichHand", Value("right"), "The hand to be used for the grasping.").asString().c_str();
-
+    // Build velocities
+    Bottle &confVelocity = rf.findGroup("velocity");
+    if (!confVelocity.isNull()) {
+        velocities.grasp = confVelocity.check("grasp", Value(50.0)).asDouble();
+        velocities.stop = confVelocity.check("stop", Value(50.0)).asDouble();
+    } else {
+        velocities.grasp = 50;
+        velocities.stop = 0;
+    }
 
     /* ******* Threads                                          ******* */
     // Gaze thread
-    gazeThread = new GazeThread(100, robotName, whichHand);
+    gazeThread = new GazeThread(100, rf);
     if (!gazeThread->start()) {
         cout << dbgTag << "Could not start the gaze thread. \n";
         return false;
     }
     // Grasp hread
-    graspThread = new GraspThread(100, robotName, whichHand);
+    graspThread = new GraspThread(100, rf);
     if (!graspThread->start()) {
         cout << dbgTag << "Could not start the grasp thread. \n";
         return false;
@@ -147,15 +154,6 @@ bool TactileGraspModule::close() {
 
 
 /* *********************************************************************************************************************** */
-/* ******* Respond to rpc calls                                             ********************************************** */   
-bool TactileGraspModule::respond(const Bottle &command, Bottle &reply) {
-
-    return true;
-}
-/* *********************************************************************************************************************** */
-
-
-/* *********************************************************************************************************************** */
 /* ******* RPC Open hand                                                    ********************************************** */
 bool TactileGraspModule::open(void) {
     graspThread->suspend();
@@ -168,6 +166,8 @@ bool TactileGraspModule::open(void) {
 /* *********************************************************************************************************************** */
 /* ******* RPC Grasp object                                                 ********************************************** */
 bool TactileGraspModule::grasp(void) {
+    graspThread->setVelocity(GraspType::Grasp, velocities.grasp);
+    graspThread->setVelocity(GraspType::Stop, velocities.stop);       // Set velocity to stop upon contact detection
     graspThread->resume();
 
     return true;
@@ -178,6 +178,10 @@ bool TactileGraspModule::grasp(void) {
 /* *********************************************************************************************************************** */
 /* ******* RPC Crush object                                                 ********************************************** */
 bool TactileGraspModule::crush(void) {
+    graspThread->setVelocity(GraspType::Grasp, velocities.grasp);
+    graspThread->setVelocity(GraspType::Stop, velocities.stop);      // Set velocity to crush object
+    graspThread->resume();
+
     return true;
 }
 /* *********************************************************************************************************************** */

@@ -30,15 +30,16 @@ using std::cout;
 using std::string;
 
 using iCub::tactileGrasp::GazeThread;
+
 using yarp::os::RateThread;
+using yarp::os::Value;
 using yarp::dev::ICartesianControl;
 using yarp::dev::IGazeControl;
 
-GazeThread::GazeThread(const int aPeriod, const string &aRobotName, const string &aWhichHand)
+GazeThread::GazeThread(const int aPeriod, const yarp::os::ResourceFinder &aRf)
     : RateThread(aPeriod) {
         period = aPeriod;
-        robotName = aRobotName;
-        whichHand = aWhichHand;
+        rf = aRf;
 
         dbgTag = "GazeThread: ";
 }
@@ -50,6 +51,11 @@ bool GazeThread::threadInit() {
 
     cout << dbgTag << "Starting thread. \n";
 
+    /* ******* Extract configuration files          ******* */
+    string robotName = rf.check("robot", Value("icub"), "The robot name.").asString().c_str();
+    string whichHand = rf.check("whichHand", Value("right"), "The hand to be used for the grasping.").asString().c_str();
+    
+    
     /* ****** Cartesian controller stuff                      ****** */
     Property optCart;
     optCart.put("device", "cartesiancontrollerclient");

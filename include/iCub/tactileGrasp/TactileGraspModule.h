@@ -92,6 +92,11 @@ namespace iCub {
                 std::string robotName;
 
                 bool closing;
+                
+                
+                /* ******* Grasp configuration                          ******* */
+                GraspVelocity velocities;
+         
          
                 /* ****** Ports                                         ****** */
                 yarp::os::RpcServer portTactileGraspRPC;
@@ -116,7 +121,6 @@ namespace iCub {
                 virtual bool updateModule();
                 virtual bool interruptModule();
                 virtual bool close();
-                virtual bool respond(const yarp::os::Bottle &command, yarp::os::Bottle &reply);
                 virtual bool attach(yarp::os::RpcServer &source);
 
                 // RPC Methods

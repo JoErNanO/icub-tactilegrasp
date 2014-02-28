@@ -29,26 +29,21 @@ using std::cerr;
 using std::cout;
 using std::string;
 
-using yarp::os::RateThread;
 using iCub::tactileGrasp::GraspThread;
+
+using yarp::os::RateThread;
+using yarp::os::Value;
 
 #define TACTILEGRASP_DEBUG 1
 
 /* *********************************************************************************************************************** */
 /* ******* Constructor                                                      ********************************************** */   
-GraspThread::GraspThread(const int aPeriod, const string &aRobotName, const string &aWhichHand) 
+GraspThread::GraspThread(const int aPeriod, const yarp::os::ResourceFinder &aRf) 
     : RateThread(aPeriod) {
         period = aPeriod;
-        robotName = aRobotName;
-        whichHand = aWhichHand;
+        rf = aRf;
 
-        VELOCITY_CRUSH = 50;
-
-        // Generate vectors
-        for (int i = 0; i < NUM_JOINTS; ++i) {
-            touchThresholds.push_back(2);
-            graspJoints.push_back(11+i);
-        }
+        nJoints = 0;
 
         dbgTag = "GraspThread: ";
 }
@@ -65,8 +60,46 @@ GraspThread::~GraspThread() {}
 /* ******* Initialise thread                                                ********************************************** */
 bool GraspThread::threadInit(void) {
     using yarp::os::Property;
+    using yarp::os::Bottle;
 
     cout << dbgTag << "Initialising. \n";
+
+    /* ******* Extract configuration files          ******* */
+    string robotName = rf.check("robot", Value("icub"), "The robot name.").asString().c_str();
+    string whichHand = rf.check("whichHand", Value("right"), "The hand to be used for the grasping.").asString().c_str();
+
+
+    // Build grasp parameters
+    Bottle &confGrasp = rf.findGroup("graspTh");
+    if (!confGrasp.isNull()) {
+        // Joints to be controlled
+        Bottle *confJoints = confGrasp.find("joints").asList();
+        // Individual touch thresholds per fingertip
+        Bottle *confTouchThr = confGrasp.find("touchThresholds").asList();
+
+        if (!(confJoints->isNull() || confTouchThr->isNull())) {
+            // Get number of joints
+            nJoints = confJoints->size();
+            if (!(confTouchThr->size() == nJoints)) {
+                // Generate parameter vectors
+                for (int i = 0; i < nJoints; ++i) {
+                    graspJoints.push_back(confJoints->get(i).asInt());
+                    touchThresholds.push_back(confTouchThr->get(i).asInt());
+                }
+            } else {
+                cerr << dbgTag << "One or more parameter lists contain either too few or too many parameters. \n";
+                cerr << dbgTag << "Expecting lists of size equal to the number of parameters. \n";
+                return false;
+            }
+        } else {
+            cerr << dbgTag << "Could not find one or more configuration parameters in the specified configuration file under the [graspTh] parameter group. \n";
+            cerr << dbgTag << "Expecting the following parameter lists: joints, touchThresholds. \n";
+            return false;
+        }
+    } else {
+        cerr << dbgTag << "Could not find grasp configuration [graspTh] group in the specified configuration file. \n";
+        return false;
+    }
 
     /* ******* Ports                                ******* */
     portGraspThreadInSkinComp.open("/TactileGrasp/skin/" + whichHand + "_hand_comp:i");
@@ -173,16 +206,16 @@ bool GraspThread::detectContact(std::vector<bool> &o_contacts) {
     Vector *inComp = portGraspThreadInSkinComp.read(false);
     if (inComp) {
         // Convert yarp vector to stl vector
-        vector<double> contacts(12*NUM_JOINTS);
+        vector<double> contacts(12*nJoints);
         for (size_t i = 0; i < contacts.size(); ++i) {
             contacts[i] = (*inComp)[i];
         }
 
         // Find maximum for each finger
-        vector<double> maxContacts(NUM_JOINTS);
+        vector<double> maxContacts(nJoints);
         vector<double>::iterator start;
         vector<double>::iterator end;
-        for (int i = 0; i < NUM_JOINTS; ++i) {
+        for (int i = 0; i < nJoints; ++i) {
             start = contacts.begin() + 12*i;
             end = start + 11;
             maxContacts[i] = *std::max_element(start, end);
@@ -196,7 +229,7 @@ bool GraspThread::detectContact(std::vector<bool> &o_contacts) {
 #endif
 
         // Check if contact is greater than threshold
-        o_contacts.resize(NUM_JOINTS, false);
+        o_contacts.resize(nJoints, false);
         for (size_t i = 0; i < maxContacts.size(); ++i) {
             o_contacts[i] = (maxContacts[i] >= touchThresholds[i]);
         }
@@ -229,10 +262,10 @@ bool GraspThread::detectContact(iCub::skinDynLib::skinContactList &o_contacts) {
 bool GraspThread::moveFingers(const std::vector<bool> &i_contacts) {
     using std::vector;
 
-    vector<double> graspVelocities(i_contacts.size(), VELOCITY_CRUSH);
+    vector<double> graspVelocities(i_contacts.size(), velocities.grasp);
     for (size_t i = 0; i < i_contacts.size(); ++i) {
         if (i_contacts[i]) {
-            graspVelocities[i] = 0;
+            graspVelocities[i] = velocities.stop;
         }
     }
 
@@ -244,7 +277,7 @@ bool GraspThread::moveFingers(const std::vector<bool> &i_contacts) {
 /* *********************************************************************************************************************** */
 /* ******* Set touch threshold.                                             ********************************************** */
 bool GraspThread::setTouchThreshold(const int aFinger, const double aThreshold) {
-    if ((aFinger > 0) && (aFinger < NUM_JOINTS)) {
+    if ((aFinger > 0) && (aFinger < nJoints)) {
         touchThresholds[aFinger] = aThreshold;
         return true;
     } else {
@@ -287,5 +320,26 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(8 , 60);
     iPos->positionMove(9 , 30);
     iPos->positionMove(10, 30);
+}
+/* *********************************************************************************************************************** */
+
+
+/* *********************************************************************************************************************** */
+/* ******* Set the given velocity                                           ********************************************** */
+bool GraspThread::setVelocity(const int &i_type, const double &i_vel) {
+    switch (i_type) {
+        case GraspType::Stop :
+            velocities.stop = i_vel;
+            break;
+        case GraspType::Grasp :
+            velocities.grasp = i_vel;
+            break;
+
+        default:
+            cerr << dbgTag << "Unknown velocity type specified. \n";
+            return false;
+    }
+
+    return true;
 }
 /* *********************************************************************************************************************** */
