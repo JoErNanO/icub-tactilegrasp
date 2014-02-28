@@ -80,12 +80,14 @@ bool GraspThread::threadInit(void) {
         if (!(confJoints->isNull() || confTouchThr->isNull())) {
             // Get number of joints
             nJoints = confJoints->size();
-            if (!(confTouchThr->size() == nJoints)) {
+            if (confTouchThr->size() == nJoints) {
                 // Generate parameter vectors
                 for (int i = 0; i < nJoints; ++i) {
                     graspJoints.push_back(confJoints->get(i).asInt());
-                    touchThresholds.push_back(confTouchThr->get(i).asInt());
+                    touchThresholds.push_back(confTouchThr->get(i).asDouble());
+                    cout << confJoints->get(i).asInt() << " " << confTouchThr->get(i).asDouble() << "\t";
                 }
+                cout << "\n";
             } else {
                 cerr << dbgTag << "One or more parameter lists contain either too few or too many parameters. \n";
                 cerr << dbgTag << "Expecting lists of size equal to the number of parameters. \n";
@@ -100,6 +102,14 @@ bool GraspThread::threadInit(void) {
         cerr << dbgTag << "Could not find grasp configuration [graspTh] group in the specified configuration file. \n";
         return false;
     }
+
+
+#ifdef TACTILEGRASP_DEBUG
+    for (int i = 0; i < nJoints; ++i) {
+        cout << graspJoints[i] << " " << touchThresholds[i] << "\t";
+    }
+    cout << "\n";
+#endif
 
     /* ******* Ports                                ******* */
     portGraspThreadInSkinComp.open("/TactileGrasp/skin/" + whichHand + "_hand_comp:i");
@@ -135,9 +145,9 @@ bool GraspThread::threadInit(void) {
     }
 
     /* ******* Store position prior to acquiring control.           ******* */
-    int nJoints;
-    iPos->getAxes(&nJoints);
-    startPos.resize(nJoints);
+    int nnJoints;
+    iPos->getAxes(&nnJoints);
+    startPos.resize(nnJoints);
     iEncs->getEncoders(startPos.data());
     for (int i = 0; i < startPos.size(); ++i) {
         cout << startPos[i] << " ";
@@ -161,8 +171,9 @@ void GraspThread::run(void) {
     using std::vector;
 
     vector<bool> contacts;
-    detectContact(contacts);
-    moveFingers(contacts);
+    if (detectContact(contacts)) {
+        moveFingers(contacts);
+    }
 }  
 /* *********************************************************************************************************************** */
 
@@ -237,6 +248,7 @@ bool GraspThread::detectContact(std::vector<bool> &o_contacts) {
 #if TACTILEGRASP_DEBUG
         cout << dbgTag << "No skin data. \n";
 #endif
+        return false;
     }
 
     return true;

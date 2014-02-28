@@ -45,7 +45,7 @@ int main(int argc, char * argv[])
     /* prepare and configure the resource finder */
     ResourceFinder rf;
     rf.setVerbose(true);
-    rf.setDefaultConfigFile("tactileGrasp.ini");
+    rf.setDefaultConfigFile("confTactileGrasp.ini");
     rf.setDefaultContext("tactileGrasp");
     rf.configure("ICUB_ROOT", argc, argv);
 

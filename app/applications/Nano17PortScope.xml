@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<application>
+<name>Tactile Grasp Demo</name>
+
+
+<!-- ****************************************************************************************************************** -->
+<!-- ******************************************************************************** -->
+<!-- ** Tactile Grasp                                                                 -->
+    <module>
+        <name>tactileGrasp</name>
+        <node></node>
+        <parameters>--from confTactileGrasp.ini</parameters>
+        <workdir></workdir>
+        <tag>Tactile Grasp module</tag>
+    </module>
+
+
+    <connection>
+        <from>/icub/skin/right_hand_comp</from>
+        <to>/TactileGrasp/skin/right_hand_comp:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/skin/left_hand_comp</from>
+        <to>/TactileGrasp/skin/left_hand_comp:i</to>
+        <protocol>udp</protocol>
+    </connection>
+<!-- ****************************************************************************************************************** -->
+
+</application>
