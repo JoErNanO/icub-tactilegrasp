@@ -15,6 +15,7 @@
 # Temp files
 *~
 *.swp
+*Old.*
 
 # Build directory
 build
