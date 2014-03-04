@@ -124,7 +124,7 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
         return false;
     }
     // Grasp hread
-    graspThread = new GraspThread(500, rf);
+    graspThread = new GraspThread(20, rf);
     if (!graspThread->start()) {
         cout << dbgTag << "Could not start the grasp thread. \n";
         return false;
@@ -210,7 +210,7 @@ bool TactileGraspModule::grasp(void) {
 /* ******* RPC Crush object                                                 ********************************************** */
 bool TactileGraspModule::crush(void) {
     graspThread->setVelocity(GraspType::Grasp, velocities.grasp);
-    graspThread->setVelocity(GraspType::Stop, velocities.stop);      // Set velocity to crush object
+    graspThread->setVelocity(GraspType::Stop, velocities.grasp);      // Set velocity to crush object
     graspThread->resume();
 
     return true;

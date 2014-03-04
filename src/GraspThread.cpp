@@ -120,7 +120,7 @@ bool GraspThread::threadInit(void) {
     Property options;
     options.put("robot", robotName.c_str()); 
     options.put("device", "remote_controlboard");
-    options.put("writeStrict", "on");
+//    options.put("writeStrict", "on");
     options.put("part", arm.c_str());
     options.put("local", ("/TactileGrasp/" + arm).c_str());
     options.put("remote", ("/" + robotName + "/" + arm).c_str());
@@ -147,10 +147,10 @@ bool GraspThread::threadInit(void) {
         return false;
     }
     // Set velocity control parameters
-    double refAccels = 10^6;
-    iVel->setRefAccelerations(&refAccels);
     iVel->getAxes(&nJointsVel);
-    iVel2->setRefAccelerations(&refAccels);
+    std::vector<double> refAccels(nJointsVel, 10^6);
+    iVel->setRefAccelerations(&refAccels[0]);
+//    iVel2->setRefAccelerations(&refAccels);
 
     /* ******* Store position prior to acquiring control.           ******* */
     int nnJoints;
@@ -181,12 +181,54 @@ bool GraspThread::threadInit(void) {
 void GraspThread::run(void) {
     using std::vector;
 
+//    vector<bool> contacts;
+//    if (detectContact(contacts)) {
+//        if (!moveFingers(contacts)) {
+//            cout << dbgTag << "Could not perform the require grasp motion. \n";
+//        }
+//    } else {
+//        cout << dbgTag << "foo \n";
+//    }
+
+//    static int counter = 0;
+//    vector<double> graspVelocities(nJointsVel, 0);
+//    
+//    if (counter <= 5) {
+//        for (size_t i = 0; i < 5; ++i) {
+//            graspVelocities[11+i] = 50;
+//        }
+//        cout << dbgTag << "Moving. \n";
+//    } else {
+//        cout << dbgTag << "Stopping. \n";
+//    }
+//    counter++;
+
+
+    using std::vector;
     vector<bool> contacts;
+    vector<double> graspVelocities(nJointsVel, 0);
     if (detectContact(contacts)) {
-        if (!moveFingers(contacts)) {
-            cout << dbgTag << "Could not perform the require grasp motion. \n";
+        for (size_t i = 0; i < 5; ++i) {
+            if (!contacts[i]) {
+                graspVelocities[11+i] = velocities.grasp[i];
+//                graspVelocities[3+i] = velocities.grasp[i];
+            } else {
+                graspVelocities[11+i] = -velocities.grasp[i];
+//                graspVelocities[3+i] = -velocities.grasp[i];
+            }
         }
+    } else {
+        cout << dbgTag << "No contact. \n";
     }
+
+    cout << dbgTag << "Moving joints at velocities: \t";
+    for (size_t i = 11; i < graspVelocities.size(); ++i) {
+//    for (size_t i = 3; i < 4; ++i) {
+        cout << i << " " << graspVelocities[i] << "\t";
+    }
+    cout << "\n";
+
+    iVel->velocityMove(&graspVelocities[0]);
 }  
 /* *********************************************************************************************************************** */
 
@@ -326,13 +368,13 @@ bool GraspThread::moveFingers(const std::vector<bool> &i_contacts) {
     
 #ifdef TACTILEGRASP_DEBUG
     cout << dbgTag << "Moving joints at speeds: \t\t";
-    for (size_t i = 0; i < graspVelocities.size(); ++i) {
+    for (size_t i = 11; i < graspVelocities.size(); ++i) {
         cout << i << " " << graspVelocities[i] << "\t";
     }
     cout << "\n";
 #endif
 
-    return iVel2->velocityMove(&graspVelocities[0]);
+    return iVel->velocityMove(&graspVelocities[0]);
 }
 /* *********************************************************************************************************************** */
 
