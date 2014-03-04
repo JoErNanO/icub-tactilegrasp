@@ -32,6 +32,7 @@
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/IPositionControl.h>
+#include <yarp/dev/IVelocityControl.h>
 #include <yarp/dev/IVelocityControl2.h>
 #include <yarp/sig/Vector.h>
 
@@ -58,7 +59,8 @@ namespace iCub {
                 yarp::dev::PolyDriver clientArm;
                 yarp::dev::IEncoders *iEncs;
                 yarp::dev::IPositionControl *iPos;
-                yarp::dev::IVelocityControl2 *iVel;
+                yarp::dev::IVelocityControl *iVel;
+                yarp::dev::IVelocityControl2 *iVel2;
 
                 /** Robot arm start position. */
                 yarp::sig::Vector startPos;
@@ -67,6 +69,7 @@ namespace iCub {
                 /* ******* Grasp configuration                          ******* */
                 GraspVelocity velocities;
                 int nJoints;
+                int nJointsVel;
                 std::vector<double> touchThresholds;
                 std::vector<int> graspJoints;
 

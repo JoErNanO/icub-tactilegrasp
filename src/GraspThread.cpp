@@ -142,19 +142,28 @@ bool GraspThread::threadInit(void) {
     if (!iVel) {
         return false;
     }
+    clientArm.view(iVel2);
+    if (!iVel2) {
+        return false;
+    }
     // Set velocity control parameters
     double refAccels = 10^6;
     iVel->setRefAccelerations(&refAccels);
+    iVel->getAxes(&nJointsVel);
+    iVel2->setRefAccelerations(&refAccels);
 
     /* ******* Store position prior to acquiring control.           ******* */
     int nnJoints;
     iPos->getAxes(&nnJoints);
     startPos.resize(nnJoints);
     iEncs->getEncoders(startPos.data());
+
+#if TACTILEGRASP_DEBUG
     for (int i = 0; i < startPos.size(); ++i) {
         cout << startPos[i] << " ";
     }
     cout << "\n";
+#endif
 
     // Put arm in position
     reachArm();
@@ -198,6 +207,9 @@ void GraspThread::threadRelease(void) {
     // Stop interfaces
     if (iVel) {
         iVel->stop();
+    }
+    if (iVel2) {
+        iVel2->stop();
     }
     if (iPos) {
         iPos->stop();
@@ -280,28 +292,47 @@ bool GraspThread::moveFingers(const std::vector<bool> &i_contacts) {
     using std::vector;
 
 //    vector<double> graspVelocities(i_contacts.size(), velocities.grasp);
-    vector<double> graspVelocities(velocities.grasp);
+//    vector<double> graspVelocities(velocities.grasp);
+//    for (size_t i = 0; i < i_contacts.size(); ++i) {
+//        if (i_contacts[i]) {
+//            graspVelocities[i] = velocities.stop[i];
+//        }
+//    }
+//
+//#ifdef TACTILEGRASP_DEBUG
+//    cout << dbgTag << "Moving joints at speeds: \t\t";
+//    for (int i = 0; i < i_contacts.size(); ++i) {
+//        cout << graspJoints[i] << " " << graspVelocities[i] << "\t";
+//    }
+//    cout << "\n";
+//#endif
+//
+//    double vels[5];
+//    int join[5];
+//    std::copy(graspVelocities.begin(), graspVelocities.end(), vels);
+//    std::copy(graspJoints.begin(), graspJoints.end(), vels);
+
+//    return iVel2->velocityMove(graspJoints.size(), &graspJoints[0], &graspVelocities[0]);
+//    return iVel2->velocityMove(graspJoints.size(), join, vels);
+    
+    vector<double> graspVelocities(nJointsVel, 0);
     for (size_t i = 0; i < i_contacts.size(); ++i) {
         if (i_contacts[i]) {
-            graspVelocities[i] = velocities.stop[i];
+            graspVelocities[11+i] = velocities.stop[i];
+        } else {
+            graspVelocities[11+i] = velocities.grasp[i];
         }
     }
-
+    
 #ifdef TACTILEGRASP_DEBUG
     cout << dbgTag << "Moving joints at speeds: \t\t";
-    for (int i = 0; i < i_contacts.size(); ++i) {
-        cout << graspJoints[i] << " " << graspVelocities[i] << "\t";
+    for (size_t i = 0; i < graspVelocities.size(); ++i) {
+        cout << i << " " << graspVelocities[i] << "\t";
     }
     cout << "\n";
 #endif
 
-    double vels[5];
-    int join[5];
-    std::copy(graspVelocities.begin(), graspVelocities.end(), vels);
-    std::copy(graspJoints.begin(), graspJoints.end(), vels);
-
-//    return iVel->velocityMove(graspJoints.size(), &graspJoints[0], &graspVelocities[0]);
-    return iVel->velocityMove(graspJoints.size(), join, vels);
+    return iVel2->velocityMove(&graspVelocities[0]);
 }
 /* *********************************************************************************************************************** */
 
@@ -324,6 +355,7 @@ bool GraspThread::setTouchThreshold(const int aFinger, const double aThreshold) 
 /* ******* Open hand                                                        ********************************************** */
 bool GraspThread::openHand(void) {
     iVel->stop();
+    iVel2->stop();
 
     // set the fingers to the original position
     iPos->positionMove(11, 5);
@@ -339,6 +371,7 @@ bool GraspThread::openHand(void) {
 /* ******* Place arm in grasping position                                   ********************************************** */ 
 bool GraspThread::reachArm(void) {
     iVel->stop();
+    iVel2->stop();
 
     // set the arm in the starting position
     iPos->positionMove(0 ,-25);
