@@ -434,10 +434,36 @@ bool GraspThread::setVelocity(const int &i_type, const std::vector<double> &i_ve
         default:
             cerr << dbgTag << "Unknown velocity type specified. \n";
             return false;
+            break;
     }
 
     return true;
 }
 /* *********************************************************************************************************************** */
 
-bool setVelocity(const int &i_type, const int &i_joint, const double &i_vel);
+
+/* *********************************************************************************************************************** */
+/* ******* Set the velocity for the given joint.                            ********************************************** */
+bool GraspThread::setVelocity(const int &i_type, const int &i_joint, const double &i_vel) {
+    if ((i_joint > 0) && (i_joint < velocities.stop.size())) {
+        switch (i_type) {
+            case GraspType::Stop :
+                velocities.stop[i_joint] = i_vel;
+                break;
+            case GraspType::Grasp :
+                velocities.grasp[i_joint] = i_vel;
+                break;
+
+            default:
+                cerr << dbgTag << "Unknown velocity type specified. \n";
+                return false;
+                break;
+        }
+    } else {
+        cerr << dbgTag << "Invalid joint specified. \n";
+        return false;
+    }
+
+    return true;
+}
+/* *********************************************************************************************************************** */
