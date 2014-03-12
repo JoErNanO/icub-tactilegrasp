@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 
 #include <yarp/os/RateThread.h>
 #include <yarp/os/ResourceFinder.h>
@@ -97,10 +98,9 @@ namespace iCub {
                 bool openHand(void); 
 
             private:
-                bool detectContact(std::vector<bool> &o_contacts);
-                bool detectContact(iCub::skinDynLib::skinContactList &o_contacts);
+                bool detectContact(std::deque<bool> &o_contacts);
 
-                bool moveFingers(const std::vector<bool> &i_contacts);
+                bool moveFingers(const std::deque<bool> &i_contacts);
 
                 bool reachArm(void);
         };

@@ -179,7 +179,7 @@ bool GraspThread::threadInit(void) {
 /* *********************************************************************************************************************** */
 /* ******* Run thread                                                       ********************************************** */
 void GraspThread::run(void) {
-    using std::vector;
+    using std::deque;
 
 //    vector<bool> contacts;
 //    if (detectContact(contacts)) {
@@ -205,7 +205,7 @@ void GraspThread::run(void) {
 
 
     using std::vector;
-    vector<bool> contacts;
+    deque<bool> contacts;
     vector<double> graspVelocities(nJointsVel, 0);
     if (detectContact(contacts)) {
         for (size_t i = 0; i < 5; ++i) {
@@ -268,8 +268,9 @@ void GraspThread::threadRelease(void) {
 
 /* *********************************************************************************************************************** */
 /* ******* Detect contact on each finger.                                   ********************************************** */
-bool GraspThread::detectContact(std::vector<bool> &o_contacts) {
+bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
     using yarp::sig::Vector;
+    using std::deque;
     using std::vector;
 
     Vector *inComp = portGraspThreadInSkinComp.read(false);
@@ -316,21 +317,9 @@ bool GraspThread::detectContact(std::vector<bool> &o_contacts) {
 
 
 /* *********************************************************************************************************************** */
-/* ******* Detect contact on each finger.                                   ********************************************** */
-bool GraspThread::detectContact(iCub::skinDynLib::skinContactList &o_contacts) {
-    using iCub::skinDynLib::skinContactList;
-
-    // Read contacts from port
-    skinContactList *scl = portGraspThreadInSkinContacts.read(false);    
-   
-    return false;
-}
-/* *********************************************************************************************************************** */
-
- 
-/* *********************************************************************************************************************** */
 /* ******* Move fingers to perform grasp movement                           ********************************************** */
-bool GraspThread::moveFingers(const std::vector<bool> &i_contacts) {
+bool GraspThread::moveFingers(const std::deque<bool> &i_contacts) {
+    using std::deque;
     using std::vector;
 
 //    vector<double> graspVelocities(i_contacts.size(), velocities.grasp);
