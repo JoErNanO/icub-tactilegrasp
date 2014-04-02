@@ -209,12 +209,17 @@ void GraspThread::run(void) {
     vector<double> graspVelocities(nJointsVel, 0);
     if (detectContact(contacts)) {
         for (size_t i = 0; i < 5; ++i) {
+//        for (size_t i = 0; i < 1; ++i) {
             if (!contacts[i]) {
                 graspVelocities[11+i] = velocities.grasp[i];
+//                graspVelocities[3] = velocities.grasp[i];
 //                graspVelocities[3+i] = velocities.grasp[i];
             } else {
                 graspVelocities[11+i] = -velocities.grasp[i];
+//                graspVelocities[11+i] = velocities.stop[i];
 //                graspVelocities[3+i] = -velocities.grasp[i];
+//                graspVelocities[3] = -velocities.grasp[i];
+//                graspVelocities[3] = -velocities.stop[i];
             }
         }
     } else {
