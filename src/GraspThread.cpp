@@ -24,6 +24,8 @@
 #include <algorithm>
 
 #include <yarp/os/Property.h>
+#include <yarp/os/Network.h>
+#include <yarp/os/Time.h>
 
 using std::cerr;
 using std::cout;
@@ -60,6 +62,7 @@ GraspThread::~GraspThread() {}
 /* ******* Initialise thread                                                ********************************************** */
 bool GraspThread::threadInit(void) {
     using yarp::os::Property;
+    using yarp::os::Network;
     using yarp::os::Bottle;
 
     cout << dbgTag << "Initialising. \n";
@@ -168,6 +171,10 @@ bool GraspThread::threadInit(void) {
     // Put arm in position
     reachArm();
 
+
+    // Connecting ports
+    Network::connect(("/icub/skin/" + whichHand + "_hand_comp"), ("/TactileGrasp/skin/" + whichHand + "_hand_comp:i"));
+
     
     cout << dbgTag << "Initialised correctly. \n";
     
@@ -208,17 +215,19 @@ void GraspThread::run(void) {
 //    deque<bool> contacts;
     deque<bool> contacts (false, 5);
     vector<double> graspVelocities(nJointsVel, 0);
-//    if (detectContact(contacts)) {
-    if (true) {   
+    if (detectContact(contacts)) {
+//    if (true) {   
         for (size_t i = 0; i < 5; ++i) {
 //        for (size_t i = 0; i < 1; ++i) {
             if (!contacts[i]) {
-                graspVelocities[i] = velocities.grasp[i];
+//                graspVelocities[i] = velocities.grasp[i];
 //                graspVelocities[3] = velocities.grasp[i];
+                graspVelocities[11+i] = velocities.grasp[i];
 //                graspVelocities[3+i] = velocities.grasp[i];
             } else {
-                graspVelocities[i] = -velocities.grasp[i];
-//                graspVelocities[11+i] = velocities.stop[i];
+//                graspVelocities[i] = -velocities.grasp[i];
+                graspVelocities[11+i] = velocities.stop[i];
+//                graspVelocities[11+i] = -velocities.grasp[i];
 //                graspVelocities[3+i] = -velocities.grasp[i];
 //                graspVelocities[3] = -velocities.grasp[i];
 //                graspVelocities[3] = -velocities.stop[i];
@@ -229,7 +238,7 @@ void GraspThread::run(void) {
     }
 
     cout << dbgTag << "Moving joints at velocities: \t";
-    for (size_t i = 11; i < graspVelocities.size(); ++i) {
+    for (size_t i = 0; i < graspVelocities.size(); ++i) {
 //    for (size_t i = 3; i < 4; ++i) {
         cout << i << " " << graspVelocities[i] << "\t";
     }
@@ -410,6 +419,8 @@ bool GraspThread::openHand(void) {
 /* *********************************************************************************************************************** */
 /* ******* Place arm in grasping position                                   ********************************************** */ 
 bool GraspThread::reachArm(void) {
+    using yarp::os::Time;
+
     iVel->stop();
     iVel2->stop();
 
@@ -417,7 +428,7 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(0 ,-25);
     iPos->positionMove(1 , 35);
     iPos->positionMove(2 , 18);
-    iPos->positionMove(3 , 86);
+    iPos->positionMove(3 , 46);
     iPos->positionMove(4 ,-32);
     iPos->positionMove(5 , 9);
     iPos->positionMove(6 , 11);
@@ -425,6 +436,14 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(8 , 60);
     iPos->positionMove(9 , 30);
     iPos->positionMove(10, 30);
+    openHand();
+
+    // Check motion done
+    bool ok = false;
+    double start = Time::now();
+    while (!ok && (start - Time::now() <= 10)) {
+        iPos->checkMotionDone(&ok);
+    }
 
     return true;
 }

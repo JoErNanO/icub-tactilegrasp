@@ -9,6 +9,8 @@ cmake_minimum_required(VERSION 2.6)
 set(PROJECTNAME tactileGrasp)
 project(${PROJECTNAME})
 
+set(CMAKE_BUILD_TYPE Debug)
+
 find_package(YARP REQUIRED)
 find_package(ICUB REQUIRED)
 find_package(ICUBcontrib REQUIRED)
