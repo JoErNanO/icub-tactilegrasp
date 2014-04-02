@@ -401,6 +401,8 @@ bool GraspThread::openHand(void) {
     iPos->positionMove(13, 15);
     iPos->positionMove(14, 20);
     iPos->positionMove(15, 40);
+
+    return true;
 }
 /* *********************************************************************************************************************** */
 
@@ -423,6 +425,8 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(8 , 60);
     iPos->positionMove(9 , 30);
     iPos->positionMove(10, 30);
+
+    return true;
 }
 /* *********************************************************************************************************************** */
 
