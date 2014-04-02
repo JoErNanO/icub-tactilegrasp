@@ -206,7 +206,7 @@ void GraspThread::run(void) {
 
     using std::vector;
 //    deque<bool> contacts;
-    deque<bool> contacts (true, 5);
+    deque<bool> contacts (false, 5);
     vector<double> graspVelocities(nJointsVel, 0);
 //    if (detectContact(contacts)) {
     if (true) {   
