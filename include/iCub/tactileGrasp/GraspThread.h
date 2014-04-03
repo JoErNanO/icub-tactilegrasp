@@ -34,7 +34,6 @@
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/IPositionControl.h>
 #include <yarp/dev/IVelocityControl.h>
-#include <yarp/dev/IVelocityControl2.h>
 #include <yarp/sig/Vector.h>
 
 #include <iCub/skinDynLib/skinContactList.h>
@@ -61,7 +60,6 @@ namespace iCub {
                 yarp::dev::IEncoders *iEncs;
                 yarp::dev::IPositionControl *iPos;
                 yarp::dev::IVelocityControl *iVel;
-                yarp::dev::IVelocityControl2 *iVel2;
 
                 /** Robot arm start position. */
                 yarp::sig::Vector startPos;

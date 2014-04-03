@@ -145,15 +145,10 @@ bool GraspThread::threadInit(void) {
     if (!iVel) {
         return false;
     }
-    clientArm.view(iVel2);
-    if (!iVel2) {
-        return false;
-    }
     // Set velocity control parameters
     iVel->getAxes(&nJointsVel);
     std::vector<double> refAccels(nJointsVel, 10^6);
     iVel->setRefAccelerations(&refAccels[0]);
-//    iVel2->setRefAccelerations(&refAccels);
 
     /* ******* Store position prior to acquiring control.           ******* */
     int nnJoints;
@@ -265,9 +260,6 @@ void GraspThread::threadRelease(void) {
     // Stop interfaces
     if (iVel) {
         iVel->stop();
-    }
-    if (iVel2) {
-        iVel2->stop();
     }
     if (iPos) {
         iPos->stop();
@@ -402,7 +394,6 @@ bool GraspThread::setTouchThreshold(const int aFinger, const double aThreshold) 
 /* ******* Open hand                                                        ********************************************** */
 bool GraspThread::openHand(void) {
     iVel->stop();
-    iVel2->stop();
 
     // set the fingers to the original position
     iPos->positionMove(11, 5);
@@ -422,7 +413,6 @@ bool GraspThread::reachArm(void) {
     using yarp::os::Time;
 
     iVel->stop();
-    iVel2->stop();
 
     // set the arm in the starting position
     iPos->positionMove(0 ,-25);
