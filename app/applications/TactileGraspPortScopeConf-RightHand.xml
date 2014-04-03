@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<portscope rows="6" columns="10" carrier="mcast">
+<portscope rows="8" columns="10" carrier="mcast">
 <!-- ****************************************************************************************************************** -->
 <!-- ******************************************************************************** -->
 <!-- ** Skin Values                                                                   -->
@@ -309,7 +309,7 @@
 <!-- ** Position Values                                                               -->
 
     <plot gridx="0" gridy="4" hspan="2" vspan="2"
-          title="Index finger hand Position Values"
+          title="Index Finger Position Values"
           size="60" minval="-10" maxval="200"
           bgcolor="LightSlateGrey">
         <graph remote="/icub/right_arm/state:o" index="11"
@@ -319,25 +319,25 @@
     </plot>
 
     <plot gridx="2" gridy="4" hspan="2" vspan="2"
-          title="Middle finger hand Position Values"
+          title="Middle Finger Position Values"
           size="60" minval="-10" maxval="200"
           bgcolor="LightSlateGrey">
         <graph remote="/icub/right_arm/state:o" index="13"
-               color="#FF6E00" title="Raw values" size="2" type="lines" />
+               color="#0000FF" title="Raw values" size="2" type="lines" />
         <graph remote="/icub/right_arm/state:o" index="14"
-               color="#FFD800" title="Raw values" size="2" type="lines" />
+               color="#FF0000" title="Raw values" size="2" type="lines" />
     </plot>
 
     <plot gridx="4" gridy="4" hspan="4" vspan="2"
-          title="Ring and little finger hand Position Values"
+          title="Ring and Little Finger Position Values"
           size="60" minval="-10" maxval="200"
           bgcolor="LightSlateGrey">
         <graph remote="/icub/right_arm/state:o" index="15"
-               color="#6EF400" title="Raw values" size="2" type="lines" />
+               color="#FF0000" title="Raw values" size="2" type="lines" />
     </plot>
 
     <plot gridx="8" gridy="4" hspan="2" vspan="2"
-          title="Thumb hand Position Values"
+          title="Thumb Position Values"
           size="60" minval="-10" maxval="200"
           bgcolor="LightSlateGrey">
         <graph remote="/icub/right_arm/state:o" index="8"
@@ -345,7 +345,55 @@
         <graph remote="/icub/right_arm/state:o" index="9"
                color="#FF0000" title="Raw values" size="2" type="lines" />
         <graph remote="/icub/right_arm/state:o" index="10"
+               color="#6EF400" title="Raw values" size="2" type="lines" />
+    </plot>
+
+<!-- ******************************************************************************** -->
+<!-- ****************************************************************************************************************** -->
+
+
+<!-- ****************************************************************************************************************** -->
+<!-- ******************************************************************************** -->
+<!-- ** Velocity Commands                                                             -->
+
+    <plot gridx="0" gridy="6" hspan="2" vspan="2"
+          title="Index Finger Velocity Command"
+          size="60" minval="-100" maxval="100"
+          bgcolor="LightSlateGrey">
+        <graph remote="/TactileGrasp/right_arm/command:o" index="11"
                color="#0000FF" title="Raw values" size="2" type="lines" />
+        <graph remote="/TactileGrasp/right_arm/command:o" index="12"
+               color="#FF0000" title="Raw values" size="2" type="lines" />
+    </plot>
+
+    <plot gridx="2" gridy="6" hspan="2" vspan="2"
+          title="Middle Finger Velocity Command"
+          size="60" minval="-100" maxval="100"
+          bgcolor="LightSlateGrey">
+        <graph remote="/TactileGrasp/right_arm/command:o" index="13"
+               color="#0000FF" title="Raw values" size="2" type="lines" />
+        <graph remote="/TactileGrasp/right_arm/command:o" index="14"
+               color="#FF0000" title="Raw values" size="2" type="lines" />
+    </plot>
+
+    <plot gridx="4" gridy="6" hspan="4" vspan="2"
+          title="Ring and Little Finger Velocity Command"
+          size="60" minval="-200" maxval="200"
+          bgcolor="LightSlateGrey">
+        <graph remote="/TactileGrasp/right_arm/command:o" index="15"
+               color="#0000FF" title="Raw values" size="2" type="lines" />
+    </plot>
+
+    <plot gridx="8" gridy="6" hspan="2" vspan="2"
+          title="Thumb Position Values"
+          size="60" minval="-100" maxval="100"
+          bgcolor="LightSlateGrey">
+        <graph remote="/TactileGrasp/right_arm/command:o" index="8"
+               color="#0000FF" title="Raw values" size="2" type="lines" />
+        <graph remote="/TactileGrasp/right_arm/command:o" index="9"
+               color="#FF0000" title="Raw values" size="2" type="lines" />
+        <graph remote="/TactileGrasp/right_arm/command:o" index="10"
+               color="#6EF400" title="Raw values" size="2" type="lines" />
     </plot>
 
 <!-- ******************************************************************************** -->
