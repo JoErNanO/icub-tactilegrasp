@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<application>
+<name>Tactile Grasp Port Scope</name>
+
+
+<!-- ****************************************************************************************************************** -->
+<!-- ******************************************************************************** -->
+<!-- ** Tactile Grasp Portscope                                                       -->
+    <module>
+        <name>yarpscope</name>
+        <node></node>
+        <parameters>--xml TactileGraspPortScopeConf-LeftHand.xml</parameters>
+        <workdir>/home/icub/.local/share/yarp/applications</workdir>
+        <tag>Tactile Grasp Left Hand Portscope</tag>
+    </module>
+
+    <module>
+        <name>yarpscope</name>
+        <node></node>
+        <parameters>--xml TactileGraspPortScopeConf-RightHand.xml</parameters>
+        <workdir>/home/icub/.local/share/yarp/applications</workdir>
+        <tag>Tactile Grasp Right Hand Portscope</tag>
+    </module>
+<!-- ****************************************************************************************************************** -->
+
+</application>
