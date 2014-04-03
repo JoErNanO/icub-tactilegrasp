@@ -24,6 +24,8 @@
 #include <algorithm>
 
 #include <yarp/os/Property.h>
+#include <yarp/os/Network.h>
+#include <yarp/os/Time.h>
 
 using std::cerr;
 using std::cout;
@@ -43,7 +45,7 @@ GraspThread::GraspThread(const int aPeriod, const yarp::os::ResourceFinder &aRf)
         period = aPeriod;
         rf = aRf;
 
-        nJoints = 0;
+        nJointsGrasp = 0;
 
         dbgTag = "GraspThread: ";
 }
@@ -60,7 +62,9 @@ GraspThread::~GraspThread() {}
 /* ******* Initialise thread                                                ********************************************** */
 bool GraspThread::threadInit(void) {
     using yarp::os::Property;
+    using yarp::os::Network;
     using yarp::os::Bottle;
+    using std::vector;
 
     cout << dbgTag << "Initialising. \n";
 
@@ -79,10 +83,10 @@ bool GraspThread::threadInit(void) {
 
         if (!(confJoints->isNull() || confTouchThr->isNull())) {
             // Get number of joints
-            nJoints = confJoints->size();
-            if (confTouchThr->size() == nJoints) {
+            nJointsGrasp = confJoints->size();
+            if (confTouchThr->size() == nJointsGrasp) {
                 // Generate parameter vectors
-                for (int i = 0; i < nJoints; ++i) {
+                for (int i = 0; i < nJointsGrasp; ++i) {
                     graspJoints.push_back(confJoints->get(i).asInt());
                     touchThresholds.push_back(confTouchThr->get(i).asDouble());
                 }
@@ -104,11 +108,14 @@ bool GraspThread::threadInit(void) {
 
 #ifdef TACTILEGRASP_DEBUG
     cout << dbgTag << "Configured joints and thresholds: \t\t";
-    for (int i = 0; i < nJoints; ++i) {
+    for (int i = 0; i < nJointsGrasp; ++i) {
         cout << graspJoints[i] << " " << touchThresholds[i] << "\t";
     }
     cout << "\n";
 #endif
+
+    /* ******* Build finger to joint map.           ******* */
+    generateJointMap(touchThresholds);
 
     /* ******* Ports                                ******* */
     portGraspThreadInSkinComp.open("/TactileGrasp/skin/" + whichHand + "_hand_comp:i");
@@ -152,6 +159,13 @@ bool GraspThread::threadInit(void) {
     iPos->getAxes(&nnJoints);
     startPos.resize(nnJoints);
     iEncs->getEncoders(startPos.data());
+    // Set reference speeds
+    vector<double> refSpeeds(nnJoints, 0);
+    iPos->getRefSpeeds(&refSpeeds[0]);
+    for (int i = 11; i < 15; ++i) {
+        refSpeeds[i] = 50;
+    }
+    iPos->setRefSpeeds(&refSpeeds[0]);
 
 #if TACTILEGRASP_DEBUG
     for (int i = 0; i < startPos.size(); ++i) {
@@ -162,6 +176,10 @@ bool GraspThread::threadInit(void) {
 
     // Put arm in position
     reachArm();
+
+
+    // Connecting ports
+    Network::connect(("/icub/skin/" + whichHand + "_hand_comp"), ("/TactileGrasp/skin/" + whichHand + "_hand_comp:i"));
 
     
     cout << dbgTag << "Initialised correctly. \n";
@@ -175,6 +193,7 @@ bool GraspThread::threadInit(void) {
 /* ******* Run thread                                                       ********************************************** */
 void GraspThread::run(void) {
     using std::deque;
+    using std::vector;
 
 //    vector<bool> contacts;
 //    if (detectContact(contacts)) {
@@ -199,17 +218,22 @@ void GraspThread::run(void) {
 //    counter++;
 
 
-    using std::vector;
-    deque<bool> contacts;
+    deque<bool> contacts (false, nJointsGrasp);
     vector<double> graspVelocities(nJointsVel, 0);
     if (detectContact(contacts)) {
-        for (size_t i = 0; i < 5; ++i) {
+        // Loop all contacts
+        for (size_t i = 0; i < contacts.size(); ++i) {
+            vector<double> fingerJoints = jointMap[i];
             if (!contacts[i]) {
-                graspVelocities[11+i] = velocities.grasp[i];
-//                graspVelocities[3+i] = velocities.grasp[i];
+                // Loop all joints in that finger
+                for (int j = 0; i < fingerJoints.size(); ++j) {
+                    graspVelocities[fingerJoints[j]] = velocities.grasp[i];
+                }
             } else {
-                graspVelocities[11+i] = -velocities.grasp[i];
-//                graspVelocities[3+i] = -velocities.grasp[i];
+                // Loop all joints in that finger
+                for (int j = 0; i < fingerJoints.size(); ++j) {
+                    graspVelocities[fingerJoints[i]] = velocities.stop[i];
+                }
             }
         }
     } else {
@@ -217,8 +241,7 @@ void GraspThread::run(void) {
     }
 
     cout << dbgTag << "Moving joints at velocities: \t";
-    for (size_t i = 11; i < graspVelocities.size(); ++i) {
-//    for (size_t i = 3; i < 4; ++i) {
+    for (size_t i = 0; i < graspVelocities.size(); ++i) {
         cout << i << " " << graspVelocities[i] << "\t";
     }
     cout << "\n";
@@ -268,16 +291,16 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
     Vector *inComp = portGraspThreadInSkinComp.read(false);
     if (inComp) {
         // Convert yarp vector to stl vector
-        vector<double> contacts(12*nJoints);
+        vector<double> contacts(12*nJointsGrasp);
         for (size_t i = 0; i < contacts.size(); ++i) {
             contacts[i] = (*inComp)[i];
         }
 
         // Find maximum for each finger
-        vector<double> maxContacts(nJoints);
+        vector<double> maxContacts(nJointsGrasp);
         vector<double>::iterator start;
         vector<double>::iterator end;
-        for (int i = 0; i < nJoints; ++i) {
+        for (int i = 0; i < nJointsGrasp; ++i) {
             start = contacts.begin() + 12*i;
             end = start + 11;
             maxContacts[i] = *std::max_element(start, end);
@@ -292,13 +315,14 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
 #endif
 
         // Check if contact is greater than threshold
-        o_contacts.resize(nJoints, false);
+        o_contacts.resize(nJointsGrasp, false);
         for (size_t i = 0; i < maxContacts.size(); ++i) {
             o_contacts[i] = (maxContacts[i] >= touchThresholds[i]);
         }
     } else {
 #if TACTILEGRASP_DEBUG
         cout << dbgTag << "No skin data. \n";
+        cout << dbgTag << "Using previous skin value. \n";
 #endif
         return false;
     }
@@ -363,7 +387,7 @@ bool GraspThread::moveFingers(const std::deque<bool> &i_contacts) {
 /* *********************************************************************************************************************** */
 /* ******* Set touch threshold.                                             ********************************************** */
 bool GraspThread::setTouchThreshold(const int aFinger, const double aThreshold) {
-    if ((aFinger > 0) && (aFinger < nJoints)) {
+    if ((aFinger > 0) && (aFinger < nJointsGrasp)) {
         touchThresholds[aFinger] = aThreshold;
         return true;
     } else {
@@ -394,13 +418,15 @@ bool GraspThread::openHand(void) {
 /* *********************************************************************************************************************** */
 /* ******* Place arm in grasping position                                   ********************************************** */ 
 bool GraspThread::reachArm(void) {
+    using yarp::os::Time;
+
     iVel->stop();
 
     // set the arm in the starting position
     iPos->positionMove(0 ,-25);
     iPos->positionMove(1 , 35);
     iPos->positionMove(2 , 18);
-    iPos->positionMove(3 , 86);
+    iPos->positionMove(3 , 46);
     iPos->positionMove(4 ,-32);
     iPos->positionMove(5 , 9);
     iPos->positionMove(6 , 11);
@@ -408,6 +434,14 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(8 , 60);
     iPos->positionMove(9 , 30);
     iPos->positionMove(10, 30);
+//    openHand();
+
+    // Check motion done
+    bool ok = false;
+    double start = Time::now();
+    while (!ok && (start - Time::now() <= 10)) {
+        iPos->checkMotionDone(&ok);
+    }
 
     return true;
 }
@@ -458,6 +492,46 @@ bool GraspThread::setVelocity(const int &i_type, const int &i_joint, const doubl
         return false;
     }
 
+    return true;
+}
+/* *********************************************************************************************************************** */
+
+
+/* *********************************************************************************************************************** */
+/* ******* Generate the mapping of each finger into the controllable joints it contains.  ******************************** */
+bool GraspThread::generateJointMap(std::vector<double> &i_thresholds) {
+    // FG:  This is probably one of the dirtiest pieces of code I have ever concocted. I found no clean why to map finger IDs
+    //      (0,1,2,3,4) into their respective joints in the robotic kinematic chain. I chose this one.
+    //
+    using std::vector;
+
+    // Initialise map
+    jointMap.resize(i_thresholds.size());
+
+    // Loop thresholds
+    for (size_t i = 0; i < i_thresholds.size(); ++i) {
+        vector<double> tmp;
+        if (i_thresholds[i] > 0) {
+            // Create joint list
+            if (i == 0) {
+                tmp.push_back(11);
+                tmp.push_back(12);
+            } else if (i == 1) {
+                tmp.push_back(13);
+                tmp.push_back(14);
+            } else if (i == 2) {
+                tmp.push_back(15);
+            } else if (i == 3) {
+                tmp.push_back(15);
+            } else if (i == 4) {
+                tmp.push_back(8);
+                tmp.push_back(9);
+                tmp.push_back(10);
+            }
+        }
+        // Add joint list to map
+        jointMap.push_back(tmp);
+    }
     return true;
 }
 /* *********************************************************************************************************************** */

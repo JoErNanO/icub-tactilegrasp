@@ -48,6 +48,9 @@ namespace iCub {
             std::vector<double> stop;
         };
 
+        /** Typedef representing the mapping of each finger into the controllable joints it contains. */
+        typedef std::vector<std::vector<double> > FingerJointMap;
+
         class GraspThread : public yarp::os::RateThread {
             private:
                 /* ****** Module attributes                             ****** */
@@ -67,10 +70,15 @@ namespace iCub {
 
                 /* ******* Grasp configuration                          ******* */
                 GraspVelocity velocities;
-                int nJoints;
+                /** Number of joints used for the grasping movement. */
+                int nJointsGrasp;
+                /** Total number of joints to be controlled by the velocity interface. This is set by yarp::dev::IVelocityControl::getAxes(). */
                 int nJointsVel;
                 std::vector<double> touchThresholds;
+                /** IDs of the joints to be used for the grasping movement. */
                 std::vector<int> graspJoints;
+                /** Mapping of each finger into the controllable joints it contains. */
+                FingerJointMap jointMap;
 
                 
                 /* ****** Ports                                         ****** */
@@ -96,6 +104,8 @@ namespace iCub {
                 bool openHand(void); 
 
             private:
+                bool generateJointMap(std::vector<double> &i_thresholds);
+
                 bool detectContact(std::deque<bool> &o_contacts);
 
                 bool moveFingers(const std::deque<bool> &i_contacts);
