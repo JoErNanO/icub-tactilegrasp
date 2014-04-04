@@ -70,8 +70,8 @@ namespace iCub {
 
                 /* ******* Grasp configuration                          ******* */
                 GraspVelocity velocities;
-                /** Number of joints used for the grasping movement. */
-                int nJointsGrasp;
+                /** Number of fingers used for the grasping movement. */
+                int nFingers;
                 /** Total number of joints to be controlled by the velocity interface. This is set by yarp::dev::IVelocityControl::getAxes(). */
                 int nJointsVel;
                 std::vector<double> touchThresholds;
@@ -99,7 +99,25 @@ namespace iCub {
                 virtual void threadRelease(void);
 
                 bool setTouchThreshold(const int aFinger, const double aThreshold);
-                bool setVelocity(const int &i_type, const std::vector<double> &i_vel);
+
+                /**
+                 * Set velocities of all joints.
+                 *
+                 * \param i_type The velocity type (grasp or stop).
+                 * \param i_vel The vector of joint velocities
+                 * \return True upon success
+                 */
+                bool setVelocities(const int &i_type, const std::vector<double> &i_vel);
+
+                /**
+                 * Set the velocity of the given joint.
+                 *
+                 * \param i_type The velocity type (grasp or stop).
+                 * \param i_joint The join to be set
+                 * \param i_vel The vector of joint velocities
+                 * \return True upon success
+                 */
+                 
                 bool setVelocity(const int &i_type, const int &i_joint, const double &i_vel);
                 bool openHand(void); 
 
