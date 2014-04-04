@@ -280,7 +280,7 @@ std::vector<std::string> tactileGrasp_IDLServer::help(const std::string& functio
     if (functionName=="grasp") {
       helpString.push_back("bool grasp() ");
       helpString.push_back("Grasp an object using feedback from the fingertips tactile sensors. ");
-      helpString.push_back("The grasping movement is stoped upon contact detection. ");
+      helpString.push_back("The grasping movement is stopped upon contact detection. ");
       helpString.push_back("@return true/false on success/failure. ");
     }
     if (functionName=="crush") {

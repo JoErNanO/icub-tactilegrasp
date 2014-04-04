@@ -77,32 +77,22 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
 
 
     /* ******* Get parameters from rf                           ******* */
-    // Get number of joints
-    int nJoints = 0;
-    if (rf.check("nJoints")) {
-        nJoints = rf.find("nJoints").asInt();
-    } else {
-        cerr << dbgTag << "Could not find the number of controlled joints parameter (nJoints) in the specified configuration file. \n";
-        return false;
-    }
-
     // Build velocities
     Bottle &confVelocity = rf.findGroup("velocity");
     if (!confVelocity.isNull()) {
         // Grasp velocities
         Bottle *confVelGrasp = confVelocity.find("grasp").asList();
-        if (nJoints == confVelGrasp->size()) {
+        if (confVelGrasp->size() > 0) {
             for (int i = 0; i < confVelGrasp->size(); ++i) {
                 velocities.grasp.push_back(confVelGrasp->get(i).asDouble());
             }
         } else {
-            cerr << dbgTag << "Too many or too few grasp velocities were found in the specified configuration file. \n";
-            cerr << dbgTag << "Expecting a number of velocities parameters equal to nJoints. \n";
+            cerr << dbgTag << "No grasp velocities were found in the specified configuration file. \n";
             return false;
         }
         
         // Stop velocities
-        velocities.stop.resize(nJoints , confVelocity.check("stop", Value(0.0)).asDouble());
+        velocities.stop.resize(velocities.grasp.size() , confVelocity.check("stop", Value(0.0)).asDouble());
     } else {
         cerr << dbgTag << "Could not find the velocities parameter group [velocity] in the given configuration file. \n";
         return false;
@@ -110,8 +100,8 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
 
 #ifdef TACTILEGRASP_DEBUG
     cout << dbgTag << "Configured velocities: \t\t";
-    for (int i = 0; i < nJoints; ++i) {
-        cout << velocities.grasp[i] << " " << velocities.stop[i] << "\t";
+    for (size_t i = 0; i < velocities.grasp.size(); ++i) {
+        cout << "J" << i + 8 << " " << velocities.grasp[i] << " " << velocities.stop[i] << "\t";
     }
     cout << "\n";
 #endif
@@ -197,8 +187,8 @@ bool TactileGraspModule::open(void) {
 /* *********************************************************************************************************************** */
 /* ******* RPC Grasp object                                                 ********************************************** */
 bool TactileGraspModule::grasp(void) {
-    graspThread->setVelocity(GraspType::Grasp, velocities.grasp);
-    graspThread->setVelocity(GraspType::Stop, velocities.stop);       // Set velocity to stop upon contact detection
+    graspThread->setVelocities(GraspType::Grasp, velocities.grasp);
+    graspThread->setVelocities(GraspType::Stop, velocities.stop);       // Set velocity to stop upon contact detection
     graspThread->resume();
 
     return true;
@@ -209,8 +199,8 @@ bool TactileGraspModule::grasp(void) {
 /* *********************************************************************************************************************** */
 /* ******* RPC Crush object                                                 ********************************************** */
 bool TactileGraspModule::crush(void) {
-    graspThread->setVelocity(GraspType::Grasp, velocities.grasp);
-    graspThread->setVelocity(GraspType::Stop, velocities.grasp);      // Set velocity to crush object
+    graspThread->setVelocities(GraspType::Grasp, velocities.grasp);
+    graspThread->setVelocities(GraspType::Stop, velocities.grasp);      // Set velocity to crush object
     graspThread->resume();
 
     return true;
