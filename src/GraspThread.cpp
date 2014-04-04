@@ -101,10 +101,11 @@ bool GraspThread::threadInit(void) {
 
     // Print out debug information
 #ifdef TACTILEGRASP_DEBUG
+    cout << "\n";
     cout << dbgTag << "Configured joints and thresholds: \n";
     for (size_t i = 0; i < touchThresholds.size(); ++i) {
-        cout << dbgTag << "\t\t\tFinger ID: " << i << "\t Touch threshold: " << touchThresholds[i] << "\t Joints: ";
-        vector<double> fingerJoints = jointMap[i];
+        cout << dbgTag << "\tFinger ID: " << i << "\t Touch threshold: " << touchThresholds[i] << "\t Joints: ";
+        vector<int> fingerJoints = jointMap[i];
         for (size_t j = 0; j < fingerJoints.size(); ++j) {
             cout << fingerJoints[j] << " ";
         }
@@ -115,11 +116,7 @@ bool GraspThread::threadInit(void) {
 
 
     /* ******* Initialise previous contacts.        ******* */
-    previousContacts.resize(nJointsGrasp, false);
-
-
-    /* ******* Build finger to joint map.           ******* */
-    generateJointMap(touchThresholds);
+    previousContacts.resize(nFingers, false);
 
 
     /* ******* Ports                                ******* */
@@ -175,6 +172,8 @@ bool GraspThread::threadInit(void) {
     iPos->setRefSpeeds(&refSpeeds[0]);
 
 #if TACTILEGRASP_DEBUG
+    cout << "\n";
+    cout << dbgTag << "Stored initial arm positions are: ";
     for (int i = 0; i < startPos.size(); ++i) {
         cout << startPos[i] << " ";
     }
@@ -202,40 +201,51 @@ void GraspThread::run(void) {
     using std::deque;
     using std::vector;
 
-    deque<bool> contacts (false, nFingers);
-    vector<double> graspVelocities(nJointsVel, 0);
-    if (detectContact(contacts)) {
-        // Loop all contacts
-        for (size_t i = 0; i < contacts.size(); ++i) {
-            vector<double> fingerJoints = jointMap[i];
-            if (!contacts[i]) {
-                // Loop all joints in that finger
-                for (int j = 0; j < fingerJoints.size(); ++j) {
-                    // FG: -8 is required as the velocities array contains only finger joints speeds i.e. joints with id >= 8.
-                    graspVelocities[fingerJoints[j]] = velocities.grasp[fingerJoints[j] - 8];
-                }
-            } else {
-                // Loop all joints in that finger
-                for (int j = 0; j < fingerJoints.size(); ++j) {
-                    // FG: -8 is required as the velocities array contains only finger joints speeds i.e. joints with id >= 8.
-                    graspVelocities[fingerJoints[j]] = velocities.stop[fingerJoints[j] - 8];
+
+    // Check that the control thread is actually being run or if this is just the module::configure() acting.
+    if (velocities.grasp.size() > 0) {
+        deque<bool> contacts (false, nFingers);
+        vector<double> graspVelocities(nJointsVel, 0);
+        if (detectContact(contacts)) {
+            // Loop all contacts
+            for (size_t i = 0; i < contacts.size(); ++i) {
+                vector<int> fingerJoints = jointMap[i];
+                if (!contacts[i]) {
+                    // Loop all joints in that finger
+                    for (int j = 0; j < fingerJoints.size(); ++j) {
+                        cout << fingerJoints[j] << "\t";
+                        cout << velocities.grasp[fingerJoints[j] - 8] << " ";
+                        // FG: -8 is required as the velocities array contains only finger joints speeds i.e. joints with id >= 8.
+                        graspVelocities[fingerJoints[j]] = velocities.grasp[fingerJoints[j] - 8];
+                    }
+                    cout << "\n";
+                } else {
+                    // Loop all joints in that finger
+                    for (int j = 0; j < fingerJoints.size(); ++j) {
+                        // FG: -8 is required as the velocities array contains only finger joints speeds i.e. joints with id >= 8.
+                        graspVelocities[fingerJoints[j]] = velocities.stop[fingerJoints[j] - 8];
+                    }
                 }
             }
+        } else {
+            cout << dbgTag << "No contact. \n";
         }
-    } else {
-        cout << dbgTag << "No contact. \n";
-    }
 
 #if TACTILEGRASP_DEBUG
-    cout << dbgTag << "Moving joints at velocities: \t";
-    for (size_t i = 0; i < graspVelocities.size(); ++i) {
-        cout << i << " " << graspVelocities[i] << "\t";
-    }
-    cout << "\n";
+        cout << dbgTag << "Moving joints at velocities: \t";
+        for (size_t i = 0; i < graspVelocities.size(); ++i) {
+            cout << i << " " << graspVelocities[i] << "\t";
+        }
+        cout << "\n";
 #endif
 
-    // Send move command
-    iVel->velocityMove(&graspVelocities[0]);
+        // Send move command
+        iVel->velocityMove(&graspVelocities[0]);
+    } else {
+#if TACTILEGRASP_DEBUG
+        cout << dbgTag << "Module initialisation running. \n";
+#endif
+    }
 }  
 /* *********************************************************************************************************************** */
 
@@ -317,7 +327,6 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
         cout << dbgTag << "Using previous skin value. \n";
 #endif
         o_contacts = previousContacts;
-        return false;
     }
 
     return true;
@@ -509,8 +518,8 @@ bool GraspThread::generateJointMap(std::vector<double> &i_thresholds) {
 
     // Loop thresholds
     for (size_t i = 0; i < i_thresholds.size(); ++i) {
-        vector<double> tmp;
-        if (i_thresholds[i] > 0) {
+        vector<int> tmp;
+        if (i_thresholds[i] >= 0) {
             // Create joint list
             if (i == 0) {
                 tmp.push_back(11);
@@ -526,11 +535,12 @@ bool GraspThread::generateJointMap(std::vector<double> &i_thresholds) {
                 tmp.push_back(8);
                 tmp.push_back(9);
                 tmp.push_back(10);
-            }
+            } 
         }
         // Add joint list to map
-        jointMap.push_back(tmp);
+        jointMap[i] = tmp;
     }
+
     return true;
 }
 /* *********************************************************************************************************************** */

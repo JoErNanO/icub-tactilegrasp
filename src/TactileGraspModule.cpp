@@ -99,9 +99,10 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
     }
 
 #ifdef TACTILEGRASP_DEBUG
-    cout << dbgTag << "Configured velocities: \t\t";
+    cout << "\n";
+    cout << dbgTag << "Configured velocities: \n";
     for (size_t i = 0; i < velocities.grasp.size(); ++i) {
-        cout << "J" << i + 8 << " " << velocities.grasp[i] << " " << velocities.stop[i] << "\t";
+        cout << dbgTag << "\t Joint " << i + 8 << ":\t" << velocities.grasp[i] << "\t" << velocities.stop[i] << "\n";
     }
     cout << "\n";
 #endif

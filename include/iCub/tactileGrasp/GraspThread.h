@@ -49,7 +49,7 @@ namespace iCub {
         };
 
         /** Typedef representing the mapping of each finger into the controllable joints it contains. */
-        typedef std::vector<std::vector<double> > FingerJointMap;
+        typedef std::vector<std::vector<int> > FingerJointMap;
 
         class GraspThread : public yarp::os::RateThread {
             private:
