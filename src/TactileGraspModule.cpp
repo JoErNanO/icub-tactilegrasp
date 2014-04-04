@@ -115,7 +115,7 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
         return false;
     }
     // Grasp hread
-    graspThread = new GraspThread(10, rf);
+    graspThread = new GraspThread(20, rf);
     if (!graspThread->start()) {
         cout << dbgTag << "Could not start the grasp thread. \n";
         return false;
