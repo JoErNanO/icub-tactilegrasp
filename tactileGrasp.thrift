@@ -16,7 +16,7 @@ service tactileGrasp_IDLServer
 
     /**
      * Grasp an object using feedback from the fingertips tactile sensors.
-     * The grasping movement is stoped upon contact detection.
+     * The grasping movement is stopped upon contact detection.
      * @return true/false on success/failure.
      */
     bool grasp();
