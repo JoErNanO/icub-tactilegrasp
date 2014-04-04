@@ -213,12 +213,9 @@ void GraspThread::run(void) {
                 if (!contacts[i]) {
                     // Loop all joints in that finger
                     for (int j = 0; j < fingerJoints.size(); ++j) {
-                        cout << fingerJoints[j] << "\t";
-                        cout << velocities.grasp[fingerJoints[j] - 8] << " ";
                         // FG: -8 is required as the velocities array contains only finger joints speeds i.e. joints with id >= 8.
                         graspVelocities[fingerJoints[j]] = velocities.grasp[fingerJoints[j] - 8];
                     }
-                    cout << "\n";
                 } else {
                     // Loop all joints in that finger
                     for (int j = 0; j < fingerJoints.size(); ++j) {
