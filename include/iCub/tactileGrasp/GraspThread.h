@@ -132,8 +132,6 @@ namespace iCub {
 
                 bool detectContact(std::deque<bool> &o_contacts);
 
-                bool moveFingers(const std::deque<bool> &i_contacts);
-
                 bool reachArm(void);
         };
     }

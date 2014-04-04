@@ -332,58 +332,6 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
 
 
 /* *********************************************************************************************************************** */
-/* ******* Move fingers to perform grasp movement                           ********************************************** */
-bool GraspThread::moveFingers(const std::deque<bool> &i_contacts) {
-    using std::deque;
-    using std::vector;
-
-//    vector<double> graspVelocities(i_contacts.size(), velocities.grasp);
-//    vector<double> graspVelocities(velocities.grasp);
-//    for (size_t i = 0; i < i_contacts.size(); ++i) {
-//        if (i_contacts[i]) {
-//            graspVelocities[i] = velocities.stop[i];
-//        }
-//    }
-//
-//#ifdef TACTILEGRASP_DEBUG
-//    cout << dbgTag << "Moving joints at speeds: \t\t";
-//    for (int i = 0; i < i_contacts.size(); ++i) {
-//        cout << graspJoints[i] << " " << graspVelocities[i] << "\t";
-//    }
-//    cout << "\n";
-//#endif
-//
-//    double vels[5];
-//    int join[5];
-//    std::copy(graspVelocities.begin(), graspVelocities.end(), vels);
-//    std::copy(graspJoints.begin(), graspJoints.end(), vels);
-
-//    return iVel2->velocityMove(graspJoints.size(), &graspJoints[0], &graspVelocities[0]);
-//    return iVel2->velocityMove(graspJoints.size(), join, vels);
-    
-    vector<double> graspVelocities(nJointsVel, 0);
-    for (size_t i = 0; i < i_contacts.size(); ++i) {
-        if (i_contacts[i]) {
-            graspVelocities[11+i] = velocities.stop[i];
-        } else {
-            graspVelocities[11+i] = velocities.grasp[i];
-        }
-    }
-    
-#ifdef TACTILEGRASP_DEBUG
-    cout << dbgTag << "Moving joints at speeds: \t\t";
-    for (size_t i = 11; i < graspVelocities.size(); ++i) {
-        cout << i << " " << graspVelocities[i] << "\t";
-    }
-    cout << "\n";
-#endif
-
-    return iVel->velocityMove(&graspVelocities[0]);
-}
-/* *********************************************************************************************************************** */
-
-
-/* *********************************************************************************************************************** */
 /* ******* Set touch threshold.                                             ********************************************** */
 bool GraspThread::setTouchThreshold(const int aFinger, const double aThreshold) {
     if ((aFinger > 0) && (aFinger < nFingers)) {
