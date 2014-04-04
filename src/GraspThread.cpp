@@ -114,13 +114,20 @@ bool GraspThread::threadInit(void) {
     cout << "\n";
 #endif
 
+
+    /* ******* Initialise previous contacts.        ******* */
+    previousContacts.resize(nJointsGrasp, false);
+
+
     /* ******* Build finger to joint map.           ******* */
     generateJointMap(touchThresholds);
+
 
     /* ******* Ports                                ******* */
     portGraspThreadInSkinComp.open("/TactileGrasp/skin/" + whichHand + "_hand_comp:i");
     portGraspThreadInSkinRaw.open("/TactileGrasp/skin/" + whichHand + "_hand_raw:i");
     portGraspThreadInSkinContacts.open("/TactileGrasp/skin/contacts:i");
+
 
     /* ******* Joint interfaces                     ******* */
     string arm = whichHand + "_arm";
@@ -153,6 +160,7 @@ bool GraspThread::threadInit(void) {
     iVel->getAxes(&nJointsVel);
     std::vector<double> refAccels(nJointsVel, 10^6);
     iVel->setRefAccelerations(&refAccels[0]);
+
 
     /* ******* Store position prior to acquiring control.           ******* */
     int nnJoints;
@@ -218,7 +226,7 @@ void GraspThread::run(void) {
 //    counter++;
 
 
-    deque<bool> contacts (false, nJointsGrasp);
+    deque<bool> contacts (false, previousContacts.size());
     vector<double> graspVelocities(nJointsVel, 0);
     if (detectContact(contacts)) {
         // Loop all contacts
@@ -319,11 +327,15 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
         for (size_t i = 0; i < maxContacts.size(); ++i) {
             o_contacts[i] = (maxContacts[i] >= touchThresholds[i]);
         }
+
+        // Store previous contacts
+        previousContacts = o_contacts;
     } else {
 #if TACTILEGRASP_DEBUG
         cout << dbgTag << "No skin data. \n";
         cout << dbgTag << "Using previous skin value. \n";
 #endif
+        o_contacts = previousContacts;
         return false;
     }
 

@@ -68,13 +68,19 @@ namespace iCub {
                 yarp::sig::Vector startPos;
 
 
+                /* ******* Contact detection configuration              ******* */
+                /** The previous skin contacts. This is stored to avoid herratic behaviour when clocking this thread faster than the skin threads. */
+                std::deque<bool> previousContacts;
+                /** The touch threshold for each fingertip. */
+                std::vector<double> touchThresholds;
+
                 /* ******* Grasp configuration                          ******* */
+                /** The grasp velocities. */
                 GraspVelocity velocities;
                 /** Number of joints used for the grasping movement. */
                 int nJointsGrasp;
                 /** Total number of joints to be controlled by the velocity interface. This is set by yarp::dev::IVelocityControl::getAxes(). */
                 int nJointsVel;
-                std::vector<double> touchThresholds;
                 /** IDs of the joints to be used for the grasping movement. */
                 std::vector<int> graspJoints;
                 /** Mapping of each finger into the controllable joints it contains. */
