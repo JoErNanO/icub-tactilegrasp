@@ -12,9 +12,9 @@ before_script:
   - cmake --version
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$(pwd)/../install
+  - cmake ../src/ -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$(pwd)/../install
 
 script:
   - make
-  - make test
-  - make install
+#  - make test
+#  - make install
