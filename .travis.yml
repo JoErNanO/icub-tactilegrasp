@@ -16,6 +16,14 @@ install:
   - sudo apt-get update
   - sudo apt-get --force-yes install icub
 
+  # Install icub-contrib
+  - svn co https://svn.code.sf.net/p/robotcub/code/trunk/iCub/contrib ../icub-contrib
+  - cd ../icub-contrib/src/ICUBcontrib
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_INSTALL_PREFIX=$(pwd)/../install
+  - sudo make install
+
 before_script:
   - cmake --version
   - mkdir build
