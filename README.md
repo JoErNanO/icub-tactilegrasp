@@ -23,6 +23,6 @@ Compliant Grasp
 The Compliant Grasp uses a PID controller to obtain and maintain a desired level of contact with the grasped object.
 
 
-Build Status
+####Build Status
 ------------
 [![Build Status](https://travis-ci.org/JoErNanO/icub-tactilegrasp.svg?branch=master)](https://travis-ci.org/JoErNanO/icub-tactilegrasp)
