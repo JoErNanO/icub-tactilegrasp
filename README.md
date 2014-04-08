@@ -8,21 +8,21 @@ Available grasping modes are:
  * Compliant grasp
 
 
-Soft Grasp
+##Soft Grasp
 ----------
 The Soft Grasp uses feedback from the fingertip tactile sensors to stop the grasping action once contact with an object is detected.
 
 
-Tough Grasp
+##Tough Grasp
 -----------
 The Tough Grasp does not use any feedback and will continue with the grasping action regardless if the fingertips are sensing anything.
 
 
-Compliant Grasp
+##Compliant Grasp
 ---------------
 The Compliant Grasp uses a PID controller to obtain and maintain a desired level of contact with the grasped object.
 
 
-####Build Status
 ------------
+####Build Status
 [![Build Status](https://travis-ci.org/JoErNanO/icub-tactilegrasp.svg?branch=master)](https://travis-ci.org/JoErNanO/icub-tactilegrasp)
