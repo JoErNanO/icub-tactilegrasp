@@ -13,7 +13,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_package(YARP REQUIRED)
 find_package(ICUB REQUIRED)
-find_package(ICUBcontrib REQUIRED)
+#find_package(ICUBcontrib REQUIRED)
 
 #optionally: use cmake find scripts provided by YARP and iCub
 set(CMAKE_MODULE_PATH ${YARP_MODULE_PATH} ${CMAKE_MODULE_PATH})
@@ -23,8 +23,8 @@ set(CMAKE_INSTALL_PREFIX "$ENV{ICUB_DIR}" CACHE PATH "Install path prefix, pre-a
 list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH} ${ICUB_MODULE_PATH} ${ICUBCONTRIB_MODULE_PATH})
 include(iCubHelpers)
 include(YarpInstallationHelpers)
-include(ICUBcontribOptions)
-include(ICUBcontribHelpers)
+#include(ICUBcontribOptions)
+#include(ICUBcontribHelpers)
 #icubcontrib_set_default_prefix()
 # Thrift IDL
 include(YarpIDL)
@@ -71,7 +71,5 @@ if(WIN32)
 else(WIN32)
     install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 endif(WIN32)
-#yarp_install(FILES GurlsClassificationRecursive.xml DESTINATION ${ICUBCONTRIB_MODULES_INSTALL_DIR})
 
-
-icubcontrib_add_uninstall_target()
+#icubcontrib_add_uninstall_target()
