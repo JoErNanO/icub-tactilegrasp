@@ -9,23 +9,39 @@ cmake_minimum_required(VERSION 2.6)
 set(PROJECTNAME tactileGrasp)
 project(${PROJECTNAME})
 
-set(CMAKE_BUILD_TYPE Debug)
 
+# Check build type
+if(NOT CMAKE_BUILD_TYPE)
+    MESSAGE(STATUS "No build type specified. Defaulting to Release.")
+    set(CMAKE_BUILD_TYPE Release)
+endif(NOT CMAKE_BUILD_TYPE)
+# Add flags
+MESSAGE(STATUS "Compiling in ${CMAKE_BUILD_TYPE} mode.")
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    MESSAGE(STATUS "Adding debug flags to compiler.")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+else(CMAKE_BUILD_TYPE MATCHES Debug)
+    MESSAGE(STATUS "Adding release flags to compiler.")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
+endif(CMAKE_BUILD_TYPE MATCHES Debug)
+
+
+# Find packages
 find_package(YARP REQUIRED)
 find_package(ICUB REQUIRED)
-#find_package(ICUBcontrib REQUIRED)
+#CONTRIB find_package(ICUBcontrib REQUIRED)
 
 #optionally: use cmake find scripts provided by YARP and iCub
 set(CMAKE_MODULE_PATH ${YARP_MODULE_PATH} ${CMAKE_MODULE_PATH})
-set(CMAKE_INSTALL_PREFIX "$ENV{ICUB_DIR}" CACHE PATH "Install path prefix, pre-appended onto install directory." FORCE)
+#CONTRIB set(CMAKE_INSTALL_PREFIX "$ENV{ICUB_DIR}" CACHE PATH "Install path prefix, pre-appended onto install directory." FORCE)
 
 # load support files
 list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH} ${ICUB_MODULE_PATH} ${ICUBCONTRIB_MODULE_PATH})
 include(iCubHelpers)
 include(YarpInstallationHelpers)
-#include(ICUBcontribOptions)
-#include(ICUBcontribHelpers)
-#icubcontrib_set_default_prefix()
+#CONTRIB include(ICUBcontribOptions)
+#CONTRIB include(ICUBcontribHelpers)
+#CONTRIB icubcontrib_set_default_prefix()
 # Thrift IDL
 include(YarpIDL)
 yarp_idl_to_dir(${PROJECTNAME}.thrift ${CMAKE_CURRENT_SOURCE_DIR})
@@ -72,4 +88,4 @@ else(WIN32)
     install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 endif(WIN32)
 
-#icubcontrib_add_uninstall_target()
+#CONTRIB icubcontrib_add_uninstall_target()
