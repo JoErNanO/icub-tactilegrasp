@@ -31,7 +31,7 @@ before_script:
   - mkdir build
   - mkdir install
   - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$ICUBcontrib_DIR
+  - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE}
 
 script:
   - make
