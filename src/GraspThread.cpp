@@ -82,7 +82,7 @@ bool GraspThread::threadInit(void) {
         if (!confTouchThr->isNull()) {
             // Generate parameter vectors
             nFingers = confTouchThr->size();
-            for (size_t i = 0; i < confTouchThr->size(); ++i) {
+            for (int i = 0; i < confTouchThr->size(); ++i) {
                 touchThresholds.push_back(confTouchThr->get(i).asDouble());
             }
         } else {
@@ -100,7 +100,7 @@ bool GraspThread::threadInit(void) {
 
 
     // Print out debug information
-#ifdef TACTILEGRASP_DEBUG
+#ifndef NODEBUG
     cout << "\n";
     cout << dbgTag << "Configured joints and thresholds: \n";
     for (size_t i = 0; i < touchThresholds.size(); ++i) {
@@ -171,10 +171,10 @@ bool GraspThread::threadInit(void) {
     }
     iPos->setRefSpeeds(&refSpeeds[0]);
 
-#if TACTILEGRASP_DEBUG
+#ifndef NODEBUG
     cout << "\n";
     cout << dbgTag << "Stored initial arm positions are: ";
-    for (int i = 0; i < startPos.size(); ++i) {
+    for (size_t i = 0; i < startPos.size(); ++i) {
         cout << startPos[i] << " ";
     }
     cout << "\n";
@@ -212,13 +212,13 @@ void GraspThread::run(void) {
                 vector<int> fingerJoints = jointMap[i];
                 if (!contacts[i]) {
                     // Loop all joints in that finger
-                    for (int j = 0; j < fingerJoints.size(); ++j) {
+                    for (size_t j = 0; j < fingerJoints.size(); ++j) {
                         // FG: -8 is required as the velocities array contains only finger joints speeds i.e. joints with id >= 8.
                         graspVelocities[fingerJoints[j]] = velocities.grasp[fingerJoints[j] - 8];
                     }
                 } else {
                     // Loop all joints in that finger
-                    for (int j = 0; j < fingerJoints.size(); ++j) {
+                    for (size_t j = 0; j < fingerJoints.size(); ++j) {
                         // FG: -8 is required as the velocities array contains only finger joints speeds i.e. joints with id >= 8.
                         graspVelocities[fingerJoints[j]] = velocities.stop[fingerJoints[j] - 8];
                     }
@@ -228,7 +228,7 @@ void GraspThread::run(void) {
             cout << dbgTag << "No contact. \n";
         }
 
-#if TACTILEGRASP_DEBUG
+#ifndef NODEBUG
         cout << dbgTag << "Moving joints at velocities: \t";
         for (size_t i = 0; i < graspVelocities.size(); ++i) {
             cout << i << " " << graspVelocities[i] << "\t";
@@ -239,7 +239,7 @@ void GraspThread::run(void) {
         // Send move command
         iVel->velocityMove(&graspVelocities[0]);
     } else {
-#if TACTILEGRASP_DEBUG
+#ifndef NODEBUG
         cout << dbgTag << "Module initialisation running. \n";
 #endif
     }
@@ -302,7 +302,7 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
             maxContacts[i] = *std::max_element(start, end);
         }
 
-#if TACTILEGRASP_DEBUG
+#ifndef NODEBUG
         cout << dbgTag << "Maximum contact detected: \t\t";
         for (size_t i = 0; i < maxContacts.size(); ++i) {
             cout << maxContacts[i] << " ";
@@ -319,7 +319,7 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
         // Store previous contacts
         previousContacts = o_contacts;
     } else {
-#if TACTILEGRASP_DEBUG
+#ifndef NODEBUG
         cout << dbgTag << "No skin data. \n";
         cout << dbgTag << "Using previous skin value. \n";
 #endif
