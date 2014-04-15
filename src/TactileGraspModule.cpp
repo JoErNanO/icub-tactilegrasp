@@ -32,7 +32,6 @@ using yarp::os::Value;
 using yarp::os::Bottle;
 
 
-#define TACTILEGRASP_DEBUG 1 
 
 /* *********************************************************************************************************************** */
 /* ******* Constructor                                                      ********************************************** */   
@@ -98,11 +97,11 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
         return false;
     }
 
-#ifdef TACTILEGRASP_DEBUG
+#ifndef NODEBUG
     cout << "\n";
-    cout << dbgTag << "Configured velocities: \n";
+    cout << "DEBUG: " << dbgTag << "Configured velocities: \n";
     for (size_t i = 0; i < velocities.grasp.size(); ++i) {
-        cout << dbgTag << "\t Joint " << i + 8 << ":\t" << velocities.grasp[i] << "\t" << velocities.stop[i] << "\n";
+        cout << "DEBUG: " << dbgTag << "\t Joint " << i + 8 << ":\t" << velocities.grasp[i] << "\t" << velocities.stop[i] << "\n";
     }
     cout << "\n";
 #endif
