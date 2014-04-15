@@ -133,6 +133,8 @@ namespace iCub {
                 bool detectContact(std::deque<bool> &o_contacts);
 
                 bool reachArm(void);
+
+                bool waitMoveDone(const double &i_timeout, const double &i_delay);
         };
     }
 }

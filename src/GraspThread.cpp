@@ -36,7 +36,6 @@ using iCub::tactileGrasp::GraspThread;
 using yarp::os::RateThread;
 using yarp::os::Value;
 
-#define TACTILEGRASP_DEBUG 1
 
 /* *********************************************************************************************************************** */
 /* ******* Constructor                                                      ********************************************** */   
@@ -64,6 +63,7 @@ bool GraspThread::threadInit(void) {
     using yarp::os::Property;
     using yarp::os::Network;
     using yarp::os::Bottle;
+    using yarp::os::Time;
     using std::vector;
 
     cout << dbgTag << "Initialising. \n";
@@ -157,12 +157,19 @@ bool GraspThread::threadInit(void) {
     std::vector<double> refAccels(nJointsVel, 10^6);
     iVel->setRefAccelerations(&refAccels[0]);
 
-
+    
     /* ******* Store position prior to acquiring control.           ******* */
     int nnJoints;
     iPos->getAxes(&nnJoints);
     startPos.resize(nnJoints);
-    iEncs->getEncoders(startPos.data());
+    bool ok = false;
+    while(!ok) {
+        ok = iEncs->getEncoders(startPos.data());
+#ifndef NODEBUG
+        cout << dbgTag << "Encoder data is not available yet. \n";
+#endif
+        Time::delay(0.1);
+    }
     // Set reference speeds
     vector<double> refSpeeds(nnJoints, 0);
     iPos->getRefSpeeds(&refSpeeds[0]);
@@ -267,7 +274,7 @@ void GraspThread::threadRelease(void) {
     if (iPos) {
         iPos->stop();
         // Restore initial robot position
-        //iPos->positionMove(startPos.data());
+        iPos->positionMove(startPos.data());
     }
 
     // Close driver
@@ -348,6 +355,8 @@ bool GraspThread::setTouchThreshold(const int aFinger, const double aThreshold) 
 /* *********************************************************************************************************************** */
 /* ******* Open hand                                                        ********************************************** */
 bool GraspThread::openHand(void) {
+    cout << dbgTag << "Opening hand ... \t";
+    
     iVel->stop();
 
     // Set the fingers to the original position
@@ -357,6 +366,10 @@ bool GraspThread::openHand(void) {
     iPos->positionMove(14, 0);
     iPos->positionMove(15, 40);
 
+    // Check motion done
+    waitMoveDone(10, 1);
+    cout << "Done. \n";
+
     return true;
 }
 /* *********************************************************************************************************************** */
@@ -365,8 +378,8 @@ bool GraspThread::openHand(void) {
 /* *********************************************************************************************************************** */
 /* ******* Place arm in grasping position                                   ********************************************** */ 
 bool GraspThread::reachArm(void) {
-    using yarp::os::Time;
-
+    cout << dbgTag << "Reaching for grasp ... \t";
+    
     iVel->stop();
 
     // Set the arm in the starting position
@@ -377,10 +390,10 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(3 , 65);
     iPos->positionMove(4 ,-32);
     iPos->positionMove(5 , 9);
-    iPos->positionMove(6 , 11);
-    iPos->positionMove(7 , 40);
+    iPos->positionMove(6 , -5);
+    iPos->positionMove(7 , 30);
     // Hand
-    iPos->positionMove(8 , 60);
+    iPos->positionMove(8 , 90);
     iPos->positionMove(9 , 30);
     iPos->positionMove(10, 30);
     iPos->positionMove(11, 5);
@@ -390,11 +403,8 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(15, 40);
 
     // Check motion done
-    bool ok = false;
-    double start = Time::now();
-    while (!ok && (start - Time::now() <= 10)) {
-        iPos->checkMotionDone(&ok);
-    }
+    waitMoveDone(10, 1);
+    cout << "Done. \n";
 
     return true;
 }
@@ -487,5 +497,23 @@ bool GraspThread::generateJointMap(std::vector<double> &i_thresholds) {
     }
 
     return true;
+}
+/* *********************************************************************************************************************** */
+
+
+/* *********************************************************************************************************************** */
+/* ******* Wait for motion to be completed.                                 ********************************************** */
+bool GraspThread::waitMoveDone(const double &i_timeout, const double &i_delay) {
+    using yarp::os::Time;
+    
+    bool ok = false;
+    
+    double start = Time::now();
+    while (!ok && (start - Time::now() <= i_timeout)) {
+        iPos->checkMotionDone(&ok);
+        Time::delay(i_delay);
+    }
+
+    return ok;
 }
 /* *********************************************************************************************************************** */
