@@ -102,12 +102,12 @@ bool GraspThread::threadInit(void) {
     // Print out debug information
 #ifndef NODEBUG
     cout << "\n";
-    cout << dbgTag << "Configured joints and thresholds: \n";
+    cout << "DEBUG: " << dbgTag << " Configured joints and thresholds: \n";
     for (size_t i = 0; i < touchThresholds.size(); ++i) {
-        cout << dbgTag << "\tFinger ID: " << i << "\t Touch threshold: " << touchThresholds[i] << "\t Joints: ";
+        cout << "DEBUG: " << dbgTag << "\tFinger ID: " << i << "\t Touch threshold: " << touchThresholds[i] << "\t Joints: ";
         vector<int> fingerJoints = jointMap[i];
         for (size_t j = 0; j < fingerJoints.size(); ++j) {
-            cout << fingerJoints[j] << " ";
+            cout << "DEBUG: " << fingerJoints[j] << " ";
         }
         cout << "\n";
     }
@@ -166,7 +166,7 @@ bool GraspThread::threadInit(void) {
     while(!ok) {
         ok = iEncs->getEncoders(startPos.data());
 #ifndef NODEBUG
-        cout << dbgTag << "Encoder data is not available yet. \n";
+        cout << "DEBUG: " << dbgTag << "Encoder data is not available yet. \n";
 #endif
         Time::delay(0.1);
     }
@@ -180,7 +180,7 @@ bool GraspThread::threadInit(void) {
 
 #ifndef NODEBUG
     cout << "\n";
-    cout << dbgTag << "Stored initial arm positions are: ";
+    cout << "DEBUG: " << dbgTag << "Stored initial arm positions are: ";
     for (size_t i = 0; i < startPos.size(); ++i) {
         cout << startPos[i] << " ";
     }
@@ -236,7 +236,7 @@ void GraspThread::run(void) {
         }
 
 #ifndef NODEBUG
-        cout << dbgTag << "Moving joints at velocities: \t";
+        cout << "DEBUG: " << dbgTag << "Moving joints at velocities: \t";
         for (size_t i = 0; i < graspVelocities.size(); ++i) {
             cout << i << " " << graspVelocities[i] << "\t";
         }
@@ -247,7 +247,7 @@ void GraspThread::run(void) {
         iVel->velocityMove(&graspVelocities[0]);
     } else {
 #ifndef NODEBUG
-        cout << dbgTag << "Module initialisation running. \n";
+        cout << "DEBUG: " << dbgTag << "Module initialisation running. \n";
 #endif
     }
 }  
@@ -310,7 +310,7 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
         }
 
 #ifndef NODEBUG
-        cout << dbgTag << "Maximum contact detected: \t\t";
+        cout << "DEBUG: " << dbgTag << "Maximum contact detected: \t\t";
         for (size_t i = 0; i < maxContacts.size(); ++i) {
             cout << maxContacts[i] << " ";
         }
@@ -327,8 +327,8 @@ bool GraspThread::detectContact(std::deque<bool> &o_contacts) {
         previousContacts = o_contacts;
     } else {
 #ifndef NODEBUG
-        cout << dbgTag << "No skin data. \n";
-        cout << dbgTag << "Using previous skin value. \n";
+        cout << "DEBUG: " << dbgTag << "No skin data. \n";
+        cout << "DEBUG: " << dbgTag << "Using previous skin value. \n";
 #endif
         o_contacts = previousContacts;
     }
@@ -391,7 +391,7 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(4 ,-32);
     iPos->positionMove(5 , 9);
     iPos->positionMove(6 , -5);
-    iPos->positionMove(7 , 30);
+    iPos->positionMove(7 , 20);
     // Hand
     iPos->positionMove(8 , 90);
     iPos->positionMove(9 , 30);

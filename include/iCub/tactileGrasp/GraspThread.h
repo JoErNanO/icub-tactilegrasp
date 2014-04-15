@@ -123,7 +123,6 @@ namespace iCub {
                  * \param i_vel The vector of joint velocities
                  * \return True upon success
                  */
-                 
                 bool setVelocity(const int &i_type, const int &i_joint, const double &i_vel);
                 bool openHand(void); 
 
