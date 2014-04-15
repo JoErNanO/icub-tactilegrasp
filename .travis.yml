@@ -7,7 +7,6 @@ compiler:
 env:
   - TRAVIS_BUILD_TYPE=Debug
   - TRAVIS_BUILD_TYPE=Release
-  - ICUBcontrib_DIR=$(pwd)/iCubContrib
 
 cache: apt
 
@@ -22,8 +21,8 @@ install:
   - cd ../icub-contrib/src/ICUBcontrib
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=${ICUBcontrib_DIR}
-  - make install
+  - cmake ..
+  - sudo make install
 
 before_script:
   - cmake --version
