@@ -37,10 +37,9 @@ before_script:
   - cd $PROJ_ROOT
   - cmake --version
   - mkdir build
-  - mkdir install
   - cd build
   - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE}
 
 script:
   - make
-  - make install
+  - sudo make install
