@@ -16,9 +16,6 @@ The Soft Grasp uses feedback from the fingertip tactile sensors to stop the gras
 The Crush Grasp does not use any feedback and will continue with the grasping action regardless if the fingertips are sensing anything.
 
 
-//##Compliant Grasp
-//The Compliant Grasp uses a PID controller to obtain and maintain a desired level of contact with the grasped object.
-
 
 Project Info
 ============
