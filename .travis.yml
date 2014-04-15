@@ -17,11 +17,13 @@ install:
   - sudo apt-get --force-yes install icub
 
   # Install icub-contrib
+  - export ICUBcontrib_DIR=$(pwd)/iCubContrib
   - svn co https://svn.code.sf.net/p/robotcub/code/trunk/iCub/contrib/src/ICUBcontrib ../icub-contrib/src/ICUBcontrib
   - cd ../icub-contrib/src/ICUBcontrib
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$ICUBcontrib_DIR
+  - make
   - sudo make install
 
 before_script:
@@ -29,7 +31,7 @@ before_script:
   - mkdir build
   - mkdir install
   - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$(pwd)/../install
+  - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$ICUBcontrib_DIR
 
 script:
   - make
