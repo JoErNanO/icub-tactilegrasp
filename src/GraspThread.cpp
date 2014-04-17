@@ -107,7 +107,7 @@ bool GraspThread::threadInit(void) {
         cout << "DEBUG: " << dbgTag << "\tFinger ID: " << i << "\t Touch threshold: " << touchThresholds[i] << "\t Joints: ";
         vector<int> fingerJoints = jointMap[i];
         for (size_t j = 0; j < fingerJoints.size(); ++j) {
-            cout << "DEBUG: " << fingerJoints[j] << " ";
+            cout << fingerJoints[j] << " ";
         }
         cout << "\n";
     }

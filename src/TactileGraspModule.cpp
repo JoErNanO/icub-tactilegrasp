@@ -79,19 +79,24 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
     // Build velocities
     Bottle &confVelocity = rf.findGroup("velocity");
     if (!confVelocity.isNull()) {
-        // Grasp velocities
+        // Velocities
         Bottle *confVelGrasp = confVelocity.find("grasp").asList();
         if (confVelGrasp->size() > 0) {
+            velocities.grasp.resize(confVelGrasp->size(), 0.0);
+            velocities.stop.resize(confVelGrasp->size(), 0.0);
             for (int i = 0; i < confVelGrasp->size(); ++i) {
-                velocities.grasp.push_back(confVelGrasp->get(i).asDouble());
+                // Grasp velocities
+                velocities.grasp[i] = confVelGrasp->get(i).asDouble();
+
+                // Stop velocities
+                if (velocities.grasp[i] > 0) {
+                    velocities.stop[i] = confVelocity.check("stop", Value(0.0)).asDouble();
+                }
             }
         } else {
             cerr << dbgTag << "No grasp velocities were found in the specified configuration file. \n";
             return false;
         }
-        
-        // Stop velocities
-        velocities.stop.resize(velocities.grasp.size() , confVelocity.check("stop", Value(0.0)).asDouble());
     } else {
         cerr << dbgTag << "Could not find the velocities parameter group [velocity] in the given configuration file. \n";
         return false;
@@ -108,11 +113,11 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
 
     /* ******* Threads                                          ******* */
     // Gaze thread
-    gazeThread = new GazeThread(100, rf);
-    if (!gazeThread->start()) {
-        cout << dbgTag << "Could not start the gaze thread. \n";
-        return false;
-    }
+//    gazeThread = new GazeThread(100, rf);
+//    if (!gazeThread->start()) {
+//        cout << dbgTag << "Could not start the gaze thread. \n";
+//        return false;
+//    }
     // Grasp hread
     graspThread = new GraspThread(20, rf);
     if (!graspThread->start()) {
