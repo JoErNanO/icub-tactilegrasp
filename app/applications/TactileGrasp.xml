@@ -14,7 +14,34 @@
         <tag>Tactile Grasp module</tag>
     </module>
 
+    <module>
+        <name>dataDumper</name>
+        <node></node>
+        <parameters>--name /dump_pos --dir data/icubpos/dump</parameters>
+        <workdir></workdir>
+        <tag>iCub Position datadumper</tag>
+    </module>
 
+    <module>
+        <name>dataDumper</name>
+        <node></node>
+        <parameters>--name /dump_skin --dir data/icubskin/dump</parameters>
+        <workdir></workdir>
+        <tag>Skin dataDumper</tag>
+    </module>
+
+    <module>
+        <name>dataDumper</name>
+        <node></node>
+        <parameters>--name /dump_nano --dir data/icubnano/dump</parameters>
+        <workdir></workdir>
+        <tag>Nano17 dataDumper</tag>
+    </module>
+<!-- ******************************************************************************** -->
+    
+
+<!-- ******************************************************************************** -->
+<!-- ** Connections                                                                   -->
     <connection>
         <from>/icub/skin/right_hand_comp</from>
         <to>/TactileGrasp/skin/right_hand_comp:i</to>
