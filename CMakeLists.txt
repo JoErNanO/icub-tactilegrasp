@@ -65,6 +65,13 @@ set(INC_SOURCES
     src/main.cpp
 )
 
+# Search for application files
+set(APP_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/app/applications/TactileGrasp.xml.template)
+
+# Search for ini files
+set(APP_CONF ${CMAKE_CURRENT_SOURCE_DIR}/app/contexts/${PROJECTNAME}/confTactileGrasp.ini)
+
+# Search for thrift files
 set(IDL ${PROJECTNAME}.thrift)
 
 source_group("Source Files" FILES ${INC_SOURCES})
@@ -79,5 +86,8 @@ if(WIN32)
 else(WIN32)
     install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 endif(WIN32)
+
+yarp_install(FILES ${APP_SCRIPTS} DESTINATION ${ICUBCONTRIB_APPLICATIONS_TEMPLATES_INSTALL_DIR})
+yarp_install(FILES ${APP_CONF} DESTINATION ${ICUBCONTRIB_CONTEXTS_INSTALL_DIR}/${PROJECTNAME})
 
 icubcontrib_add_uninstall_target()
