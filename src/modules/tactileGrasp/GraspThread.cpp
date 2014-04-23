@@ -364,7 +364,7 @@ bool GraspThread::openHand(void) {
     iPos->positionMove(12, 0);
     iPos->positionMove(13, 15);
     iPos->positionMove(14, 0);
-    iPos->positionMove(15, 40);
+    iPos->positionMove(15, 250);
 
     // Check motion done
     waitMoveDone(10, 1);
