@@ -113,11 +113,11 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
 
     /* ******* Threads                                          ******* */
     // Gaze thread
-//    gazeThread = new GazeThread(100, rf);
-//    if (!gazeThread->start()) {
-//        cout << dbgTag << "Could not start the gaze thread. \n";
-//        return false;
-//    }
+    gazeThread = new GazeThread(100, rf);
+    if (!gazeThread->start()) {
+        cout << dbgTag << "Could not start the gaze thread. \n";
+        return false;
+    }
     // Grasp hread
     graspThread = new GraspThread(20, rf);
     if (!graspThread->start()) {
