@@ -362,7 +362,7 @@ bool GraspThread::openHand(void) {
     // Set the fingers to the original position
     iPos->positionMove(11, 5);
     iPos->positionMove(12, 0);
-    iPos->positionMove(13, 15);
+    iPos->positionMove(13, 0);
     iPos->positionMove(14, 0);
     iPos->positionMove(15, 40);
 
@@ -398,7 +398,7 @@ bool GraspThread::reachArm(void) {
     iPos->positionMove(10, 30);
     iPos->positionMove(11, 5);
     iPos->positionMove(12, 0);
-    iPos->positionMove(13, 15);
+    iPos->positionMove(13, 0);
     iPos->positionMove(14, 0);
     iPos->positionMove(15, 40);
 
