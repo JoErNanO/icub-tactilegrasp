@@ -1,0 +1,10 @@
+/**
+ * \brief The iCub TactileGrasp is a YARP module to perform grasping actions using tactile feedback from the fingertips, to avoid damaging grasped objects.
+ * \author Francesco Giovannini (francesco.giovannini@iit.it)
+ * \file
+ */
+ 
+/**
+ * \mainpage iCub TactileGrasp Documentation
+ * This is the iCub TactileGrasp project documentation resulting from automatic parsing of doxygen comments in the code.
+ */
