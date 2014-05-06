@@ -1,0 +1,39 @@
+<module>
+    <name>tactileGrasp</name>
+    <description>The tactileGrasp is a module to perform grasping actions using tactile feedback from the fingertips, to avoid damaging grasped objects.</description>
+    <version>1.0</version>
+
+
+    <authors>
+        <author email="francesco.giovannini@iit.it"> Francesco Giovannini </author>
+    </authors>
+
+
+    <arguments>
+        <!-- Module configuration -->
+        <param default="tactileGrasp" desc="The module name."> name </param>
+        <param default="1.0" desc="The module period in seconds."> period </param>
+        <param default="icub" desc="The robot name."> robotName </param>
+        <param default="right" desc="The hand to use while grasping."> whichHand </param>
+        
+        <!-- Grasping velocities -->
+        <param default="(0 0 0 20 0 20 0 150)" desc="The grasping velocity for each joint >= 8."> grasp </param>
+        <param default="0" desc="The stop velocity."> stop </param>
+        
+        <!-- Grasp thread parameters -->
+        <param default="(5 0 0 0 0)" desc="The touch threshold for each finger. Finger IDs are: 0 1 2 3 4"> touchThresholds </param>
+
+    </arguments>
+
+
+     <data>
+        <output>
+            <type>yarp::os::RpcServer</type>
+            <port carrier="rpc">/tactileGrasp/cmd:io</port>
+            <description>This is the RPC port used to control the grasping motion.</description>
+        </output>
+    </data>
+
+
+</module>
+
