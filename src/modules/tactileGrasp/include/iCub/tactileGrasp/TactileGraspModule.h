@@ -20,12 +20,25 @@
 
 /**
  * @ingroup icub_module
- * \defgroup icub_MyModule TactileGraspModule
- * 
- * The TactileGraspModule is a
+ * \defgroup TactileGraspModule TactileGraspModule
+ * The TactileGraspModule is a module to perform grasping actions using tactile feedback from the fingertips, to avoid damaging grasped objects.
+ * Version: 2.0
  * 
  * \section intro_sec Description
- * Description here...
+ * 
+ * The Tactile Grasp is a module which perfors several types of object grasping using different levels of control and compliance.
+ * Available grasping modes are:
+ * - Soft grasp
+ * - Crush grasp
+ * 
+ * 
+ * <b>Soft Grasp</b> <br />
+ * The Soft Grasp uses feedback from the fingertip tactile sensors to stop the grasping action once contact with an object is detected.
+ * The contact thresholds are to be tuned appropriately to improve the grasping motion.
+ * 
+ * 
+ * <b>Crush Grasp</b> <br />
+ * The Crush Grasp does not use any feedback and will continue with the grasping action regardless if the fingertips are sensing anything.
  * 
  * 
  * \section lib_sec Libraries
@@ -34,39 +47,46 @@
  * 
  * \section parameters_sec Parameters
  * <b>Command-line Parameters</b> 
+ * - -- from : Module ini configuration file.
+ * 
  * <b>Configuration File Parameters </b>
+ * - -- name : The module name.
+ * - -- period : The module period in seconds.
+ * - -- robotName : The robot name.
+ * - -- whichHand : The hand to use while grasping.
+ * - -- grasp : The grasping velocity for each joint &gt;= 8.
+ * - -- stop : The stop velocity.
+ * - -- touchThresholds : The touch threshold for each finger. Finger IDs are: 0 1 2 3 4
  *  
  * 
  * \section portsa_sec Ports Accessed
- * 
+ * - /icub/skin/left_hand_comp [yarp::sig::Vector]  [default carrier:tcp]: This is the compensated skin port for the selected grasping hand.
+ * - /icub/skin/right_hand_comp [yarp::sig::Vector]  [default carrier:tcp]: This is the compensated skin port for the selected grasping hand.
  * 
  * \section portsc_sec Ports Created
- * <b>Output ports </b>
- * <b>Input ports</b>
+ * <b>RPC ports</b>
+ * - /tactileGrasp/cmd:io [yarp::os::RpcServer]  [default carrier:rpc]: This is the RPC port used to control the grasping motion.
+ *   - The documentation for the available RPC commands can be found in the thrift IDL implementation of the RPC server here: tactileGrasp_IDLServer. One can also type "help" in the rpc port to display the full list of commands.
  * 
  * 
- * \section in_files_sec Input Data Files
- * 
- * 
- * \section out_data_sec Output Data Files
- * 
- *  
  * \section conf_file_sec Configuration Files
+ * - confTactileGrasp.ini : The module configuration file. 
  * 
  * 
  * \section tested_os_sec Tested OS
+ * Linux
  * 
  * 
  * \section example_sec Example Instantiation of the Module
- * 
+ * tactileGrasp --from confTactileGrasp.ini
  * 
  * \author Francesco Giovannini (francesco.giovannini@iit.it)
  * 
- * Copyright (C) 2014 Francesco Giovannini, iCub Facility - Istituto Italiano di Tecnologia
- * 
+ * \copyright 
+ * Copyright (C) 2014 Francesco Giovannini, iCub Facility - Istituto Italiano di Tecnologia <br />
  * CopyPolicy: Released under the terms of the GNU GPL v2.0.
  * 
- * This file can be edited at .... .
+ * This file can be edited at src/modules/TactileGrasp/include/TactileGraspModule.h
  */
 
 #ifndef __TACTILEGRASP_MODULE_H__
