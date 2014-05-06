@@ -4,8 +4,7 @@ iCub Tactile Grasp
 The Tactile Grasp is a module which perfors several types of object grasping using different levels of control and compliance.
 Available grasping modes are:
  * Soft grasp
- * Tough grasp
- * Compliant grasp
+ * Crush grasp
 
 
 ##Soft Grasp
@@ -14,6 +13,15 @@ The Soft Grasp uses feedback from the fingertip tactile sensors to stop the gras
 
 ##Crush Grasp
 The Crush Grasp does not use any feedback and will continue with the grasping action regardless if the fingertips are sensing anything.
+
+
+##Documentation
+To generate the documentation for this project run:
+```bash
+    doxygen conf/Doxyfile
+```
+from the root of the cloned repository.
+The documentation will be generated in the _doc/_ directory.
 
 
 
