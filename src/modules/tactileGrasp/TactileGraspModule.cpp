@@ -66,12 +66,12 @@ bool TactileGraspModule::configure(ResourceFinder &rf) {
 
     /* ****** Configure the Module                            ****** */
     // Get resource finder and extract properties
-    moduleName = rf.check("name", Value("contactDetector"), "The module name.").asString().c_str();
+    moduleName = rf.check("name", Value("tactileGrasp"), "The module name.").asString().c_str();
     period = rf.check("period", 1.0).asDouble();
 
 
     /* ******* Open ports                                       ******* */
-    portTactileGraspRPC.open("/TactileGrasp/cmd:io");
+    portTactileGraspRPC.open("/tactileGrasp/cmd:io");
     attach(portTactileGraspRPC);
 
 
