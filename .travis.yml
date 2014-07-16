@@ -1,45 +1,46 @@
 language: cpp
 
 compiler:
-  - gcc
-  - clang
+    - gcc
+    - clang
 
 env:
-  - TRAVIS_BUILD_TYPE=Debug
-  - TRAVIS_BUILD_TYPE=Release
+    - TRAVIS_BUILD_TYPE=Debug
+    - TRAVIS_BUILD_TYPE=Release
 
 cache: apt
 
 install:
-  # Store root directory
-  - export TRAV_ROOT=$(pwd)/..
-  # Store project root
-  - export PROJ_ROOT=$(pwd)
+    # Store root directory
+    - export TRAV_ROOT=$(pwd)/..
+    # Store project root
+    - export PROJ_ROOT=$(pwd)
 
-  # Install icub
-  - sudo sh -c 'echo "deb http://www.icub.org/ubuntu precise contrib/science" > /etc/apt/sources.list.d/icub.list'
-  - sudo apt-get update
-  - sudo apt-get --force-yes install icub
+    # Install icub
+    - sudo sh -c 'echo "deb http://www.icub.org/ubuntu precise contrib/science" > /etc/apt/sources.list.d/icub.list'
+    - sudo apt-get update
+    - sudo apt-get --force-yes install icub
 
-  # Install icub-contrib
-  - export ICUBcontrib_DIR=$TRAV_ROOT/iCubContrib
-  - cd $TRAV_ROOT
-  - svn co https://svn.code.sf.net/p/robotcub/code/trunk/iCub/contrib/src/ICUBcontrib icub-contrib/src/ICUBcontrib
-  - cd icub-contrib/src/ICUBcontrib
-  - mkdir build
-  - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$ICUBcontrib_DIR
-  - make
-  - sudo make install
-  - cd $TRAV_ROOT
+    # Install icub-contrib
+    - export ICUBcontrib_DIR=$TRAV_ROOT/iCubContrib
+    - cd $TRAV_ROOT
+#    - svn co https://svn.code.sf.net/p/robotcub/code/trunk/iCub/contrib/src/ICUBcontrib icub-contrib/src/ICUBcontrib
+    - git clone https://github.com/robotology/icub-contrib-common.git
+    - cd icub-contrib/src/ICUBcontrib
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$ICUBcontrib_DIR
+    - make
+    - sudo make install
+    - cd $TRAV_ROOT
 
 before_script:
-  - cd $PROJ_ROOT
-  - cmake --version
-  - mkdir build
-  - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE}
+    - cd $PROJ_ROOT
+    - cmake --version
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE}
 
 script:
-  - make
-  - sudo make install
+    - make
+    - sudo make install
