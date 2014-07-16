@@ -26,7 +26,7 @@ install:
     - cd $TRAV_ROOT
 #    - svn co https://svn.code.sf.net/p/robotcub/code/trunk/iCub/contrib/src/ICUBcontrib icub-contrib/src/ICUBcontrib
     - git clone https://github.com/robotology/icub-contrib-common.git
-    - cd icub-contrib/src/ICUBcontrib
+    - cd icub-contrib-common
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=$ICUBcontrib_DIR
