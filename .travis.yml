@@ -58,11 +58,11 @@ script:
     - make
     - sudo make install
 
+after_success:
     # Create doxygen documentation
     - cd $PROJ_ROOT
-    - doxygen conf/Doxyfile
+    - doxygen conf/Doxyfile > /dev/null
 
-after_success:
     # Publish doxygen documentation
     - cd $PROJ_ROOT
     - chmod -R 744 .travis
