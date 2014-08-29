@@ -31,4 +31,4 @@ Project Info
 ============
 
 ####Build Status
-[![Build Status](https://travis-ci.org/JoErNanO/icub-tactilegrasp.svg?branch=master)](https://travis-ci.org/JoErNanO/icub-tactilegrasp)
+[![Build Status](https://travis-ci.org/robotology/icub-tactilegrasp.svg?branch=master)](https://travis-ci.org/robotology/icub-tactilegrasp)
