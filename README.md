@@ -1,7 +1,7 @@
 iCub Tactile Grasp
 =================
 
-The Tactile Grasp is a module which perfors several types of object grasping using different levels of control and compliance.
+The Tactile Grasp is a module that performs several types of object grasping using different levels of control and compliance.
 Available grasping modes are:
  * Soft grasp
  * Crush grasp
